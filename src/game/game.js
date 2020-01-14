@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var Game = /** @class */ (function () {
+var Game = (function () {
     function Game(guild, emoji, leader) {
         this.guild = guild;
         this.emoji = emoji;
@@ -31,6 +29,5 @@ var Game = /** @class */ (function () {
         configurable: true
     });
     return Game;
-}());
+})();
 exports.Game = Game;
-//# sourceMappingURL=game.js.map

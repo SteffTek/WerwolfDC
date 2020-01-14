@@ -2,17 +2,27 @@ import Discord = require("discord.js");
 
 export class User {
 
-    private _dcUser: Discord.User;
+    private _dcUser: Discord.GuildMember;
     private _alive: boolean;
     private _role: string;
+    private _isLeader: boolean;
 
 
-    constructor(dcUser: Discord.User) {
+    constructor(dcUser: Discord.GuildMember, isLeader: boolean) {
         this._dcUser = dcUser;
+        this._isLeader = isLeader;
     }
 
-    get dcUser(): Discord.User {
+    get dcUser(): Discord.GuildMember {
         return this._dcUser;
+    }
+
+    get isLeader(): boolean {
+        return this._isLeader;
+    }
+
+    set isLeader(value: boolean) {
+        this._isLeader = value;
     }
 
     get alive(): boolean {
@@ -21,6 +31,15 @@ export class User {
 
     set alive(value: boolean) {
         this._alive = value;
+
+        //Set User Class
+        if(value) {
+            this._dcUser.addRole("LEBENDIG");
+            this._dcUser.removeRole("TOT");
+        } else {
+            this._dcUser.addRole("TOT");
+            this._dcUser.removeRole("LEBENDIG");
+        }
     }
 
     get role(): string {

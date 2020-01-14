@@ -7,7 +7,7 @@ import path = require("path");
 // Utils
 import {logger} from "./logger";
 
-const packagefile = require("../../../package.json");
+const packagefile = require("../../package.json");
 const configPath  = path.resolve("config.json");
 
 /**

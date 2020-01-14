@@ -1,8 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 var game_1 = require("../game/game");
 var logger_1 = require("../utils/logger");
-var GuildManager = /** @class */ (function () {
+var GuildManager = (function () {
     function GuildManager(guild) {
         this.guild = guild;
         this.gameInviteChannel = guild.channels.find("name", "spielankündigungen");
@@ -29,6 +27,5 @@ var GuildManager = /** @class */ (function () {
         });
     };
     return GuildManager;
-}());
+})();
 exports.GuildManager = GuildManager;
-//# sourceMappingURL=guild.js.map

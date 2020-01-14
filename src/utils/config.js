@@ -1,11 +1,10 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 // Core Modules
-var fs = require("fs");
+var fs = require('fs');
 var path = require("path");
 // Utils
 var logger_1 = require("./logger");
-var packagefile = require("../../../package.json");
+var packagefile = require("../../package.json");
 var configPath = path.resolve("config.json");
 /**
  * Check if the config is valid JSON
@@ -57,4 +56,3 @@ exports.getAuthor = function () {
 exports.getDescription = function () {
     return packagefile.description;
 };
-//# sourceMappingURL=config.js.map

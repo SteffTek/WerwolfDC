@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "test": "tsc compile index.ts",
     "start": "node index.js"
   },
   "author": "",

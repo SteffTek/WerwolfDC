@@ -3,7 +3,7 @@
 // Utils
 import {DiscordHandler} from "./src/events/listener";
 
-let conf = require("./src/utils/config");
+import conf = require("./src/utils/config");
 
 // APP INFO
 let version = conf.getVersion();
