@@ -1,5 +1,6 @@
 import Discord = require("discord.js");
 import {Game} from "./game";
+import {constants} from "../utils/const";
 
 export class User {
 
@@ -7,12 +8,14 @@ export class User {
     private _alive: boolean;
     private _role: string = "";
     private _isLeader: boolean;
+    private _isMayor: boolean;
     private _game: Game;
 
     constructor(dcUser: Discord.GuildMember, game: Game, isLeader: boolean) {
         this._dcUser = dcUser;
-        this._isLeader = isLeader;
         this._game = game;
+
+        this.isLeader = isLeader;
     }
 
     get dcUser(): Discord.GuildMember {
@@ -25,6 +28,26 @@ export class User {
 
     set isLeader(value: boolean) {
         this._isLeader = value;
+
+        if(value) {
+            this._dcUser.addRole(constants.leaderRole(this._game.guild, this._game.id));
+        } else {
+            this._dcUser.removeRole(constants.leaderRole(this._game.guild, this._game.id));
+        }
+    }
+
+    get isMayor(): boolean {
+        return this._isMayor;
+    }
+
+    set isMayor(value: boolean) {
+        this._isMayor = value;
+
+        if(value) {
+            this._dcUser.addRole(constants.mayorRole(this._game.guild, this._game.id));
+        } else {
+            this._dcUser.removeRole(constants.mayorRole(this._game.guild, this._game.id));
+        }
     }
 
     get alive(): boolean {
@@ -36,11 +59,11 @@ export class User {
 
         //Set User Class
         if(value) {
-            this._dcUser.addRole("LEBENDIG");
-            this._dcUser.removeRole("TOT");
+            this._dcUser.addRole(constants.aliveRole(this._game.guild, this._game.id));
+            this._dcUser.removeRole(constants.deadRole(this._game.guild, this._game.id));
         } else {
-            this._dcUser.addRole("TOT");
-            this._dcUser.removeRole("LEBENDIG");
+            this._dcUser.addRole(constants.deadRole(this._game.guild, this._game.id));
+            this._dcUser.removeRole(constants.aliveRole(this._game.guild, this._game.id));
         }
     }
 
@@ -50,5 +73,11 @@ export class User {
 
     set role(value: string) {
         this._role = value;
+    }
+
+    reset(){
+        this._dcUser.removeRole(constants.deadRole(this._game.guild, this._game.id));
+        this._dcUser.removeRole(constants.aliveRole(this._game.guild, this._game.id));
+        this._dcUser.removeRole(constants.leaderRole(this._game.guild, this._game.id));
     }
 }

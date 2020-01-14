@@ -11,7 +11,7 @@ export class GuildManager {
     constructor(guild: Discord.Guild){
         this.guild = guild;
         this.gameInviteChannel = guild.channels.find("name", "spielankündigungen");
-        this.games = {}
+        this.games = {};
     }
 
     createGame(emoji: Discord.Emoji, leader: User) {

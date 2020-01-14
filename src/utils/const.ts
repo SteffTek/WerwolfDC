@@ -11,4 +11,7 @@ export module constants {
     export function aliveRole(guild: Discord.Guild, id: number){
         return guild.roles.find(role => role.name === "Lebendig #" + id)
     }
+    export function mayorRole(guild: Discord.Guild, id: number){
+        return guild.roles.find(role => role.name === "Bürgermeister #" + id)
+    }
 }
