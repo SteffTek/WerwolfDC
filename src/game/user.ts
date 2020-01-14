@@ -1,16 +1,18 @@
 import Discord = require("discord.js");
+import {Game} from "./game";
 
 export class User {
 
     private _dcUser: Discord.GuildMember;
     private _alive: boolean;
-    private _role: string;
+    private _role: string = "";
     private _isLeader: boolean;
+    private _game: Game;
 
-
-    constructor(dcUser: Discord.GuildMember, isLeader: boolean) {
+    constructor(dcUser: Discord.GuildMember, game: Game, isLeader: boolean) {
         this._dcUser = dcUser;
         this._isLeader = isLeader;
+        this._game = game;
     }
 
     get dcUser(): Discord.GuildMember {
