@@ -9,7 +9,7 @@ var GuildManager = (function () {
     GuildManager.prototype.createGame = function (emoji, leader) {
         for (var i = 0; i < 9999; i++) {
             if (this.games[i] == null) {
-                this.games[i] = new game_1.Game(this.guild, emoji, leader);
+                this.games[i] = new game_1.Game(i, this.guild, emoji, leader);
                 return;
             }
         }

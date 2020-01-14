@@ -17,7 +17,7 @@ export class GuildManager {
     createGame(emoji: Discord.Emoji, leader: User) {
         for(var i = 0; i < 9999; i++) {
             if(this.games[i] == null){
-                this.games[i] = new Game(this.guild, emoji, leader);
+                this.games[i] = new Game(i, this.guild, emoji, leader);
                 return;
             }
         }

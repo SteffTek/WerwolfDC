@@ -1,6 +1,7 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // Core Modules
-var fs = require('fs');
+var fs = require("fs");
 var path = require("path");
 // Utils
 var logger_1 = require("./logger");
@@ -56,3 +57,4 @@ exports.getAuthor = function () {
 exports.getDescription = function () {
     return packagefile.description;
 };
+//# sourceMappingURL=config.js.map

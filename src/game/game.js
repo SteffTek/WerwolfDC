@@ -1,5 +1,8 @@
-var Game = (function () {
-    function Game(guild, emoji, leader) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var Game = /** @class */ (function () {
+    function Game(id, guild, emoji, leader) {
+        this.userChannelMap = new Map();
         this.guild = guild;
         this.emoji = emoji;
         this.leader = leader;
@@ -29,5 +32,6 @@ var Game = (function () {
         configurable: true
     });
     return Game;
-})();
+}());
 exports.Game = Game;
+//# sourceMappingURL=game.js.map
