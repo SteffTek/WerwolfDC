@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var User = /** @class */ (function () {
+var User = (function () {
     function User(dcUser) {
         this._dcUser = dcUser;
     }
@@ -32,6 +30,5 @@ var User = /** @class */ (function () {
         configurable: true
     });
     return User;
-}());
+})();
 exports.User = User;
-//# sourceMappingURL=user.js.map

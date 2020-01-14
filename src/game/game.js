@@ -6,7 +6,6 @@ var Game = /** @class */ (function () {
         this.guild = guild;
         this.emoji = emoji;
         this.leader = leader;
-        this.id = id;
         this.create();
     }
     //Create Ranks and Channels

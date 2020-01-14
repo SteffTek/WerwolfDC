@@ -1,10 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 var logger_1 = require("../utils/logger");
-var Discord = require("discord.js");
+var Discord = require('discord.js');
 var guild_1 = require("../server/guild");
 var conf = require("../utils/config");
-var DiscordHandler = /** @class */ (function () {
+var DiscordHandler = (function () {
     function DiscordHandler() {
         var _this = this;
         this.client = new Discord.Client();
@@ -38,6 +36,5 @@ var DiscordHandler = /** @class */ (function () {
         configurable: true
     });
     return DiscordHandler;
-}());
+})();
 exports.DiscordHandler = DiscordHandler;
-//# sourceMappingURL=listener.js.map
