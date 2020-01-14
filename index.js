@@ -1,15 +1,14 @@
+"use strict";
 //Req
-let DiscordHandler = require("./src/events/listener").DiscordHandler;
-
+Object.defineProperty(exports, "__esModule", { value: true });
 // Utils
-let conf = require("./src/utils/config");
-
+var listener_1 = require("./src/events/listener");
+var conf = require("./src/utils/config");
 // APP INFO
-let version = conf.getVersion();
-let appname = conf.getName();
-let devname = conf.getAuthor();
-
+var version = conf.getVersion();
+var appname = conf.getName();
+var devname = conf.getAuthor();
 //Vars
-var discordHandler = new DiscordHandler();
-
+var discordHandler = new listener_1.DiscordHandler();
 //Discord Bot ist logged in
+//# sourceMappingURL=index.js.map
