@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Game = /** @class */ (function () {
-    function Game(guild, emoji, leader) {
+    function Game(id, guild, emoji, leader) {
+        this.userChannelMap = new Map();
         this.guild = guild;
         this.emoji = emoji;
         this.leader = leader;
+        this.id = id;
         this.create();
     }
     //Create Ranks and Channels

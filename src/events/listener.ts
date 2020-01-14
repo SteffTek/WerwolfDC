@@ -30,6 +30,7 @@ export class DiscordHandler {
         this.client.on('message', msg => {
             //COMMAND LISTENER
 
+
         });
 
         //BOT JOIN SERVER HANDLER
