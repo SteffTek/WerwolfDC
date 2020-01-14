@@ -3,11 +3,14 @@ import Discord = require('discord.js');
 import {GuildManager} from "../server/guild";
 import conf = require("../utils/config");
 
+import {CommandManager} from "../commands/commandManager";
+
 export class DiscordHandler {
 
     client: Discord.Client;
     isReady: boolean;
     guilds: Array<GuildManager>;
+    commandManager = new CommandManager();
 
     constructor(){
         this.client = new Discord.Client();
@@ -29,8 +32,7 @@ export class DiscordHandler {
         //MESSAGE HANDLER
         this.client.on('message', msg => {
             //COMMAND LISTENER
-
-
+            this.commandManager.handleMessage(msg);
         });
 
         //BOT JOIN SERVER HANDLER
