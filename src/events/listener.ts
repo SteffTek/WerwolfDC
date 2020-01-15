@@ -41,7 +41,6 @@ export class DiscordHandler {
             let anyEmo = this.client.emojis.find(emoji => emoji.name == emo);
             logger.info(msg.toString());
 
-            // ich hab absolut keine Idee, ich will das zwar gerne hierdrüber machen, aber wenn's keine Möglichkeit gibt, ist's auch doof
 
 /*
             let toSend: string = "a ";
@@ -62,8 +61,6 @@ export class DiscordHandler {
                     return false;
                 });
             }*/
-
-            msg.channel.send(toSend);
 
             // msg.client.emojis.find(fn => (fn.s))
             /*this.client.emojis.find(emoji => {

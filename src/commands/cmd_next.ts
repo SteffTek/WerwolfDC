@@ -1,10 +1,10 @@
 import {Command} from "./command";
 import Discord = require("discord.js");
 
-export class cmd_creategame extends Command {
+export class cmd_next extends Command {
 
     constructor(){
-        super("create", "Erstellt ein neues Spiel.");
+        super("next", "Nächste Gamephase");
     }
 
     execute(dcMessage: Discord.Message) {

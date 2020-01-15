@@ -1,10 +1,10 @@
 import {Command} from "./command";
 import Discord = require("discord.js");
 
-export class cmd_creategame extends Command {
+export class cmd_poll extends Command {
 
     constructor(){
-        super("create", "Erstellt ein neues Spiel.");
+        super("poll", "Umfrage starten - Argument public = User Votes werden angezeigt");
     }
 
     execute(dcMessage: Discord.Message) {

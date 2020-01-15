@@ -1,10 +1,10 @@
 import {Command} from "./command";
 import Discord = require("discord.js");
 
-export class cmd_creategame extends Command {
+export class cmd_add extends Command {
 
     constructor(){
-        super("create", "Erstellt ein neues Spiel.");
+        super("add", "Nutzer hinzufügen - Role nur während der Ingame Phase benötigt");
     }
 
     execute(dcMessage: Discord.Message) {

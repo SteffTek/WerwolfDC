@@ -1,6 +1,6 @@
 import Discord = require("discord.js");
 
-export class Command{
+export abstract class Command{
 
     private _name: string;
     private _description: string;
@@ -10,7 +10,7 @@ export class Command{
         this._description = description;
     }
 
-    execute(dcMessage: Discord.Message){}
+   abstract execute(dcMessage: Discord.Message) : void;
 
 
     get name(): string {
