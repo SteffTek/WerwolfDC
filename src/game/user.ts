@@ -9,6 +9,7 @@ export class User {
     private _role: string = "";
     private _isLeader: boolean;
     private _isMayor: boolean;
+    private _chat: string;
     private _game: Game;
 
     constructor(dcUser: Discord.GuildMember, game: Game, isLeader: boolean) {
@@ -71,7 +72,33 @@ export class User {
         return this._role;
     }
 
+    set chat(value: string) {
+
+        let specialChats = this._game.userChannelMap.get("specialChats");
+
+        //RESET CHANNEL
+        for(var i in specialChats) {
+            let chat = specialChats[i];
+            this._game.guild.channels.get(chat.name).overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: false});
+
+            if(value != null){
+                if(chat.name == value) {
+                    this._game.guild.channels.get(chat.name).overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true, READ_MESSAGES: true, READ_MESSAGE_HISTORY: true});
+                }
+            }
+        }
+
+        this._chat = value;
+    }
+
+    get chat(): string {
+        return this._chat;
+    }
+
     set role(value: string) {
+        let chat = value.replace("(", " ").replace(")", "").split(" ");
+        this.chat = chat[1];
+        this._dcUser.sendMessage(chat[0]);
         this._role = value;
     }
 

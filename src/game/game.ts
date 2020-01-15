@@ -2,19 +2,29 @@ import Discord = require('discord.js');
 import {User} from "./user";
 import {constants} from "../utils/const";
 
+enum GamePhase {
+    created,
+    rolechecking,
+    ingame,
+    closed
+}
+
 export class Game {
 
+    gamePhase: GamePhase;
     guild: Discord.Guild;
     emoji: string;
     leader: User;
     id: number;
     userChannelMap = new Map();
     users: Array<User>;
+    roles: Array<string>;
 
     constructor(id: number, guild: Discord.Guild, emoji: string, dcLeader: Discord.GuildMember){
         this.guild = guild;
         this.emoji = emoji;
         this.id = id;
+        this.gamePhase = GamePhase.created;
 
         //Create Roles
         this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE"}).then(role => {
@@ -31,6 +41,8 @@ export class Game {
 
     //Create Ranks and Channels
     create() {
+
+        this.userChannelMap.set("specialChats", new Array);
 
         //Set Leader
         this.leader.isLeader = true;
@@ -58,13 +70,10 @@ export class Game {
             })
 
             //Dead
-            this.guild.createChannel("Totenchat", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.deadRole(this.guild, this.id) }]}).then(chan => {
+            this.guild.createChannel("Totenchat", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(this.guild, this.id) }]}).then(chan => {
                 chan.setParent(village.id);
                 this.userChannelMap.set("Totenchat", chan);
             })
-
-            //DIE SPIELCHATS FÜR DIE WERWÖLFE UND CO EINFÜGEN
-
 
             //VOICE
             //VILLAGE
@@ -74,7 +83,7 @@ export class Game {
             })
 
             //DEAD
-            this.guild.createChannel("Tot", {type: "voice", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.deadRole(this.guild, this.id) }]}).then(chan => {
+            this.guild.createChannel("Tot", {type: "voice", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(this.guild, this.id) }]}).then(chan => {
                 chan.setParent(village.id);
                 this.userChannelMap.set("Tot", chan);
             })
@@ -86,6 +95,19 @@ export class Game {
     close() {
         //RESET CHANNEL
         this.userChannelMap.get("Category").delete();
+        this.userChannelMap.get("Spielleitung").delete();
+        this.userChannelMap.get("GameChat").delete();
+        this.userChannelMap.get("Abstimmungen").delete();
+        this.userChannelMap.get("Totenchat").delete();
+        this.userChannelMap.get("Dorf").delete();
+        this.userChannelMap.get("Tot").delete();
+
+        //RESET SPECIAL CHANNEL
+        let specialChats = this.userChannelMap.get("specialChats");
+        for(var i in specialChats) {
+            let chat = specialChats[i];
+            this.guild.channels.get(chat.name).delete();
+        }
 
         //RESET USERS
         this.users.forEach((user) => {
@@ -99,25 +121,96 @@ export class Game {
         constants.deadRole(this.guild, this.id).delete();
         constants.mayorRole(this.guild, this.id).delete();
     }
-/*
-    get getUser() {
 
-    }*/
-
-    kickUser() {
-
+    listUsers(showRole: boolean): Array<string> {
+        let users = [];
+        for(var u in this.users){
+            let user = this.users[u];
+            users.push(user.dcUser.displayName + " " + (showRole) ? user.role : "");
+        }
+        return users;
     }
 
-    addUser() {
+    kickUser(dcUser: Discord.GuildMember) {
+        for(var u in this.users) {
+            console.log(u);
+            var user = this.users[u];
 
+            if(user.dcUser == dcUser) {
+                user.reset();
+                this.users.slice(parseInt(u), 1);
+                return;
+            }
+        }
     }
-/*
-    get getRoles() {
 
-    }*/
+    addUser(dcUser: Discord.GuildMember, role: string): boolean {
+        for(var u in this.users) {
+            console.log(u);
+            var user = this.users[u];
 
-    set setRoles(roles) {
+            if(user.dcUser == dcUser) {
+                return false; //ALREADY ADDED
+            }
+        }
 
+        let newUser = new User(dcUser, this, false)
+
+        if(role != null) {
+            newUser.alive = true;
+            newUser.role = role;
+        } else {
+            if(this.gamePhase == GamePhase.ingame){
+                return false; //Bei Ingame muss eine Rolle angegeben werden
+            }
+        }
+
+        this.users.push(newUser);
+        return true;
     }
 
+    get getRoles(): Array<string> {
+        return this.roles;
+    }
+
+    resetSpecialChannels() {
+        //RESET SPECIAL CHANNEL
+        let specialChats = this.userChannelMap.get("specialChats");
+        for(var i in specialChats) {
+            let chat = specialChats[i];
+            this.guild.channels.get(chat.name).delete();
+        }
+    }
+
+    set setRoles(array: Array<string>) {
+        //array = [werwolf(wwchat), werwolf(wwchat), dorfbewohner]
+        this.roles = array;
+
+        this.resetSpecialChannels();
+
+        //CREATE SPECIAL CHANNEL
+        this.userChannelMap.get("specialChats").clear();
+        for(var r in array) {
+            let role = array[r];
+            let chat = role.replace("(", " ").replace(")", "").split(" ")[1];
+
+            var exists = false;
+            for(var c in this.userChannelMap.get("specialChats")) {
+                let channel = this.userChannelMap.get("specialChats")[c];
+                if(channel.name == chat) {
+                    exists = true;
+                }
+            }
+
+            if(exists) {
+                continue;
+            }
+
+            //Polls
+            this.guild.createChannel(chat, {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) }]}).then(chan => {
+                chan.setParent(this.userChannelMap.get("Category").id);
+                this.userChannelMap.get("specialChats").push(chan);
+            })
+        }
+    }
 }
