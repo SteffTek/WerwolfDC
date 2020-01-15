@@ -23,6 +23,11 @@ export class GuildManager {
         }
     }
 
+    closeGame(id: number) {
+        this.games[id].close();
+        delete(this.games[id]);
+    }
+
     //Create Channel
     setup() {
         logger.info("Setting up " + this.guild.name);
