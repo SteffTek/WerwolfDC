@@ -14,10 +14,10 @@ export class GuildManager {
         this.games = {};
     }
 
-    createGame(emoji: Discord.Emoji, leader: User) {
+    createGame(emoji: string, dcLeader: Discord.GuildMember) {
         for(var i = 0; i < 9999; i++) {
             if(this.games[i] == null){
-                this.games[i] = new Game(i, this.guild, emoji, leader);
+                this.games[i] = new Game(i, this.guild, emoji, dcLeader);
                 return;
             }
         }

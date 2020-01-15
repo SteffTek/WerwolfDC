@@ -5,28 +5,32 @@ import {constants} from "../utils/const";
 export class Game {
 
     guild: Discord.Guild;
-    emoji: Discord.Emoji;
+    emoji: string;
     leader: User;
     id: number;
     userChannelMap = new Map();
     users: Array<User>;
 
-    constructor(id: number, guild: Discord.Guild, emoji: Discord.Emoji, leader: User){
+    constructor(id: number, guild: Discord.Guild, emoji: string, dcLeader: Discord.GuildMember){
         this.guild = guild;
         this.emoji = emoji;
-        this.leader = leader;
         this.id = id;
 
-        this.create();
+        //Create Roles
+        this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE"}).then(role => {
+            this.guild.createRole({name:"Lebendig #" + this.id, color: "GREEN"}).then(role => {
+                this.guild.createRole({name:"Tod #" + this.id, color: "RED"}).then(role => {
+                    this.guild.createRole({name:"Bürgermeister #" + this.id, color: "GOLD"}).then(role => {
+                        this.leader = new User(dcLeader, this, true);
+                        this.create();
+                    })
+                })
+            })
+        });
     }
 
     //Create Ranks and Channels
     create() {
-        //Create Roles
-        this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE"});
-        this.guild.createRole({name:"Spielleiter #" + this.id, color: "GREEN"});
-        this.guild.createRole({name:"Spielleiter #" + this.id, color: "RED"});
-        this.guild.createRole({name:"Bürgermeister #" + this.id, color: "GOLD"});
 
         //Set Leader
         this.leader.isLeader = true;
@@ -36,7 +40,7 @@ export class Game {
             this.userChannelMap.set("Category", village);
 
             //SPIELLEITER
-            this.guild.createChannel("Spielleitung", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) }]}).then(chan => {
+            this.guild.createChannel("Spielleitung", {type: "text", permissionOverwrites: [{id: this.guild.defaultRole.id, deny: ["VIEW_CHANNEL"] },{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(this.guild, this.id), deny: ["VIEW_CHANNEL"] }]}).then(chan => {
                 chan.setParent(village.id);
                 this.userChannelMap.set("Spielleitung", chan);
             })
