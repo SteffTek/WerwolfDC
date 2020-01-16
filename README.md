@@ -27,6 +27,7 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 
 #### Nutzer hinzufügen
 ##### (Role nur während Phase <ingame> benötigt)
+Da User@Mention benötigt, kann nur in öffentlichen Spiel-Kanälen genutzt werden.
 > /add user@mention [role]
 
 #### Nutzer entfernen
@@ -40,6 +41,7 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 > /list
 
 #### Spielleitung übergeben
+Da User@Mention benötigt, kann nur in öffentlichen Spiel-Kanälen genutzt werden.
 > /leader user@mention
 
 #### Abstimmung erstellen
