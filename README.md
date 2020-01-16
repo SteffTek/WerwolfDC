@@ -8,6 +8,9 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 #### Hilfe Anzeigen
 > /help
 
+#### Den Bot nach dem Joinen Aufsetzen (Falls es nicht klappt)
+> /setup
+
 #### Spiel erstellen
 > /create emoji nachricht
 
