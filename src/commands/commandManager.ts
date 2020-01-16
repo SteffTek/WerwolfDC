@@ -7,7 +7,7 @@ import {cmd_creategame} from "./cmd_creategame";
 
 export class CommandManager {
 
-    commands: Array<Command>;
+    commands: Array<Command> = new Array<Command>();
 
     constructor() {
         this.add(new cmd_creategame());

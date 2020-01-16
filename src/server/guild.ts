@@ -2,7 +2,7 @@ import Discord = require('discord.js');
 import {Game} from "../game/game";
 import {User} from "../game/user";
 import {logger} from "../utils/logger";
-export class GuildManager {
+export class GuildGameManager {
 
     guild: Discord.Guild;
     gameInviteChannel: Discord.Channel;
@@ -15,12 +15,13 @@ export class GuildManager {
     }
 
     createGame(emoji: string, dcLeader: Discord.GuildMember) {
-        for(var i = 0; i < 9999; i++) {
+        for(var i = 1; i < 10000; i++) {
             if(this.games[i] == null){
                 this.games[i] = new Game(i, this.guild, emoji, dcLeader);
-                return;
+                return i;
             }
         }
+        return -1;
     }
 
     closeGame(id: number) {
