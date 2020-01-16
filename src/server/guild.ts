@@ -2,7 +2,7 @@ import Discord = require('discord.js');
 import {Game} from "../game/game";
 import {User} from "../game/user";
 import {logger} from "../utils/logger";
-export class GuildManager {
+export class GuildGameManager {
 
     guild: Discord.Guild;
     gameInviteChannel: Discord.Channel;

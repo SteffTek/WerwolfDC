@@ -8,5 +8,7 @@ export class cmd_add extends Command {
     }
 
     execute(dcMessage: Discord.Message) {
+
+
     }
 }
