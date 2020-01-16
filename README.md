@@ -71,7 +71,7 @@ Da User@Mention benötigt, kann nur in öffentlichen Spiel-Kanälen genutzt werd
 - Pool kann erstellt werden
 - Nutzer können Hinzugefügt/Gekickt werden
 - Rollen können geshuffeld werden
-- Es kann zurück in die Phase <created> gewechselt werden
+- Es kann zurück in die Phase created gewechselt werden
 
 ### Phase 3: __ingame__
 
@@ -93,4 +93,4 @@ Da User@Mention benötigt, kann nur in öffentlichen Spiel-Kanälen genutzt werd
 #### Phasen-Regeln:
 - die Rollen werden entfernt
 - die Channel werden gelöscht
-- <WIP> Matchhistory wird gepublished
+- WIP Matchhistory wird gepublished
