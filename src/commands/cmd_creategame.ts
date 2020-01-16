@@ -42,7 +42,7 @@ export class cmd_creategame extends Command {
         let customEmoji;
         try {
             customEmoji = emoji[0].split(":")[2].substr(0, emoji[0].split(":")[2].length - 1);
-        } catch {}
+        } catch(e) {}
 
         if(customEmoji != null) {
             if(dcMessage.guild.emojis.get(customEmoji) == null) {
@@ -51,12 +51,12 @@ export class cmd_creategame extends Command {
             }
         }
 
-        let i = MainIndex.instance.guildGameManagerByGuild(dcMessage.guild).createGame(emoji.toString(), dcMessage.member);
-        dcMessage.member.send("Spiel erstellt. ID: #" + i);
         let tmpMsg;
         dcMessage.channel.send(dcMessage.content.substr(8).toString()).then(msg => {
             tmpMsg = msg;
 
+            let i = MainIndex.instance.guildGameManagerByGuild(dcMessage.guild).createGame(emoji.toString(), dcMessage.member, dcMessage);
+            dcMessage.member.send("Spiel erstellt. ID: #" + i);
             //tmpMsg.react(emoji[0]);-*
 
             if(customEmoji != null){

@@ -16,16 +16,18 @@ export class Game {
     guild: Discord.Guild;
     emoji: string;
     leader: User;
+    createMessage: Discord.Message;
     id: number;
     userChannelMap = new Map();
     users: Array<User>;
     roles: Array<string>;
     userActions: Object;
 
-    constructor(id: number, guild: Discord.Guild, emoji: string, dcLeader: Discord.GuildMember){
+    constructor(id: number, guild: Discord.Guild, emoji: string, dcLeader: Discord.GuildMember, createMessage: Discord.Message){
         this.guild = guild;
         this.emoji = emoji;
         this.id = id;
+        this.createMessage = createMessage;
         this.gamePhase = GamePhase.created;
 
         //Create Roles
@@ -106,6 +108,7 @@ export class Game {
             }
 
             user.announceRole();
+            this.createMessage.delete();
 
             //Im Spielleiter Channel Message erstellen
             this.userChannelMap.get("Spielleitung").send(user.dcUser.displayName + " - " + user.role).then( message => {
@@ -146,6 +149,9 @@ export class Game {
         constants.aliveRole(this.guild, this.id).delete();
         constants.deadRole(this.guild, this.id).delete();
         constants.mayorRole(this.guild, this.id).delete();
+
+        //Remove Invite Message
+        this.createMessage.delete();
     }
 
     listUsers(showRole: boolean): Array<string> {
