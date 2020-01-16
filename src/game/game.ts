@@ -121,21 +121,25 @@ export class Game {
     }
 
     close() {
-        //RESET CHANNEL
-        this.userChannelMap.get("Spielleitung").delete();
-        this.userChannelMap.get("GameChat").delete();
-        this.userChannelMap.get("Abstimmungen").delete();
-        this.userChannelMap.get("Totenchat").delete();
-        this.userChannelMap.get("Dorf").delete();
-        this.userChannelMap.get("Tot").delete();
-        this.userChannelMap.get("Category").delete();
-
         //RESET SPECIAL CHANNEL
-        let specialChats = this.userChannelMap.get("specialChats");
-        for(var i in specialChats) {
-            let chat = specialChats[i];
-            this.guild.channels.get(chat.name).delete();
-        }
+        this.resetSpecialChannels();
+
+        //RESET CHANNEL
+        this.userChannelMap.get("Spielleitung").delete().then(success => {
+            this.userChannelMap.get("GameChat").delete().then(success => {
+                this.userChannelMap.get("Abstimmungen").delete().then(success => {
+                    this.userChannelMap.get("Totenchat").delete().then(success => {
+                        this.userChannelMap.get("Dorf").delete().then(success => {
+                            this.userChannelMap.get("Tot").delete().then(success => {
+                                this.userChannelMap.get("Category").delete().then(success => {
+                                    //FERTIG
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
 
         //RESET USERS
         for(let u in this.users){
@@ -263,12 +267,12 @@ export class Game {
 
         //CREATE SPECIAL CHANNEL
         this.userChannelMap.get("specialChats").clear();
-        for(var r in array) {
+        for(const r in array) {
             let role = array[r];
             let chat = role.replace("(", " ").replace(")", "").split(" ")[1];
 
-            var exists = false;
-            for(var c in this.userChannelMap.get("specialChats")) {
+            let exists = false;
+            for(const c in this.userChannelMap.get("specialChats")) {
                 let channel = this.userChannelMap.get("specialChats")[c];
                 if(channel.name == chat) {
                     exists = true;

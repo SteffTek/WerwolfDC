@@ -55,7 +55,7 @@ export class cmd_creategame extends Command {
         dcMessage.channel.send(dcMessage.content.substr(8).toString()).then(msg => {
             tmpMsg = msg;
 
-            let i = MainIndex.instance.guildGameManagerByGuild(dcMessage.guild).createGame(emoji.toString(), dcMessage.member, dcMessage);
+            let i = MainIndex.instance.guildGameManagerByGuild(dcMessage.guild).createGame(emoji.toString(), dcMessage.member, tmpMsg);
             dcMessage.member.send("Spiel erstellt. ID: #" + i);
             //tmpMsg.react(emoji[0]);-*
 

@@ -23,6 +23,22 @@ export class DiscordHandler {
             }))
         });
 
+        //REACTION HANDLER
+        MainIndex.instance.discordClient.on('messageReactionAdd', reaction => {
+            if(reaction.me)
+                return;
+
+            let guild = reaction.message.guild;
+            let guildGameManager = MainIndex.instance.guildGameManagerByGuild(guild);
+
+        });
+        MainIndex.instance.discordClient.on('messageReactionRemove', reaction => {
+            let guild = reaction.message.guild;
+            let guildGameManager = MainIndex.instance.guildGameManagerByGuild(guild);
+
+
+        });
+
         //MESSAGE HANDLER
         MainIndex.instance.discordClient.on('message', msg => {
             if (msg.author === MainIndex.instance.discordClient.user)
