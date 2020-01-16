@@ -72,6 +72,10 @@ export class User {
         return this._role;
     }
 
+    set role(value: string) {
+        this._role = value;
+    }
+
     set chat(value: string) {
 
         let specialChats = this._game.userChannelMap.get("specialChats");
@@ -95,11 +99,10 @@ export class User {
         return this._chat;
     }
 
-    set role(value: string) {
-        let chat = value.replace("(", " ").replace(")", "").split(" ");
+    announceRole() {
+        let chat = this._role.replace("(", " ").replace(")", "").split(" ");
         this.chat = chat[1];
         this._dcUser.sendMessage(chat[0]);
-        this._role = value;
     }
 
     reset(){

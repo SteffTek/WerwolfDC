@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^7.0.5",
     "discord.js": "^11.5.1",
-    "@types/node": "^7.0.5"
+    "string-similarity": "^4.0.1"
   }
 }
