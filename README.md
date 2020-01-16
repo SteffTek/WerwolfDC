@@ -9,7 +9,7 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 > /help
 
 #### Spiel erstellen
-> /create <emoji> <nachricht>
+> /create emoji nachricht
 
 #### Rollen festlegen
 > /pool [anz name(chat)][]...
@@ -30,11 +30,11 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 > /add user@mention [role]
 
 #### Nutzer entfernen
-> /kick user@mention
+> /kick user
 
 #### Spieler Muten Umschalten
 ##### Wenn Spielername angegeben wird nur dieser Gemuted/Entmuted
-> /mute [user@mention]
+> /mute [user]
 
 #### Spieler auflisten
 > /list
@@ -47,7 +47,7 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 > /poll [public]
 
 #### Rolle ändern
-> /role user@mention newRole(chat)
+> /role user newRole(chat)
 
 ## Die Spielphasen
 
