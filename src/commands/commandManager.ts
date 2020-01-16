@@ -1,6 +1,7 @@
 import Discord = require("discord.js");
 import {Command} from "./command";
 import {logger} from "../utils/logger";
+import "./cmd_creategame"
 import conf = require("../utils/config");
 import {cmd_creategame} from "./cmd_creategame";
 
@@ -25,5 +26,7 @@ export class CommandManager {
                 }
             }
         })
+
+
     }
 }
