@@ -8,7 +8,5 @@ export class cmd_creategame extends Command {
     }
 
     execute(dcMessage: Discord.Message) {
-
-
     }
 }
