@@ -17,6 +17,9 @@ export class User {
         this._game = game;
 
         this.isLeader = isLeader;
+
+        if(!this.isLeader)
+            this.alive = true;
     }
 
     get dcUser(): Discord.GuildMember {

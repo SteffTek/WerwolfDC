@@ -21,18 +21,20 @@ export module constants {
 
         let users = [];
 
-        for(var u in game.users) {
+        for(let u in game.users) {
             let user = game.users[u];
             let username = user.dcUser.displayName;
             users.push(username);
         }
 
-        var matches = stringSimilarity.findBestMatch(string, users);
+        let matches = stringSimilarity.findBestMatch(string, users);
 
-        for(var u in game.users) {
+        for(let u in game.users) {
             let user = game.users[u];
             if(user.dcUser.displayName == matches.bestMatch.target) {
-                return user;
+                if(matches.bestMatch.rating > 0.1){
+                    return user;
+                }
             }
         }
 

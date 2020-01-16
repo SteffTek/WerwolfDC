@@ -6,6 +6,7 @@ import conf = require("../utils/config");
 import {cmd_creategame} from "./cmd_creategame";
 import {cmd_next} from "./cmd_next";
 import {cmd_close} from "./cmd_close";
+import {cmd_kick} from "./cmd_kick";
 
 export class CommandManager {
 
@@ -14,6 +15,7 @@ export class CommandManager {
     constructor() {
         this.add(new cmd_creategame());
         this.add(new cmd_close());
+        this.add(new cmd_kick());
     }
 
     add(command: Command) {

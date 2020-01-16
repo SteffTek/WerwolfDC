@@ -29,6 +29,7 @@ export class Game {
         this.id = id;
         this.createMessage = createMessage;
         this.gamePhase = GamePhase.created;
+        this.users = [];
 
         //Create Roles
         this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE"}).then(role => {
@@ -168,7 +169,7 @@ export class Game {
     }
 
     kickUser(dcUser: Discord.GuildMember) {
-        for(var u in this.users) {
+        for(let u in this.users) {
             console.log(u);
             var user = this.users[u];
 
@@ -184,13 +185,13 @@ export class Game {
                 }
 
                 user.reset();
-                this.users.slice(parseInt(u), 1);
+                this.users.splice(parseInt(u), 1);
                 return;
             }
         }
     }
 
-    addUser(dcUser: Discord.GuildMember, role: string): boolean {
+    addUser(dcUser: Discord.GuildMember, role: string = null): boolean {
         for(var u in this.users) {
             console.log(u);
             var user = this.users[u];

@@ -1,9 +1,11 @@
 import {logger} from "../utils/logger";
 import {GuildGameManager} from "../server/guild";
 import conf = require("../utils/config");
+import Discord = require("discord.js");
 
 import {MainIndex} from "../../index";
 import {stringutils} from "../utils/stringutils";
+import {type} from "os";
 
 export class DiscordHandler {
 
@@ -24,19 +26,67 @@ export class DiscordHandler {
         });
 
         //REACTION HANDLER
-        MainIndex.instance.discordClient.on('messageReactionAdd', reaction => {
-            if(reaction.me)
+        MainIndex.instance.discordClient.on('messageReactionAdd', (reaction, user) => {
+
+            if(user == MainIndex.instance.discordClient.user)
                 return;
 
+            let isMainChannel = false;
+
+            if(reaction.message.guild.channels.get(reaction.message.channel.id).name == conf.getConfig().mainChannel){
+                isMainChannel = true;
+            }
+
             let guild = reaction.message.guild;
             let guildGameManager = MainIndex.instance.guildGameManagerByGuild(guild);
+            let game;
 
+            if(isMainChannel) {
+                for(let ga in guildGameManager.games) {
+                    if(reaction.message.id == guildGameManager.games[ga].createMessage.id) {
+                        game = guildGameManager.games[ga];
+                        break;
+                    }
+                }
+
+                if(game == null) {
+                    return;
+                }
+
+                if(game.leader.dcUser.id != user.id)
+                    game.addUser(reaction.message.guild.members.get(user.id));
+            }
         });
-        MainIndex.instance.discordClient.on('messageReactionRemove', reaction => {
+        MainIndex.instance.discordClient.on('messageReactionRemove', (reaction, user) => {
+
+            if(user == MainIndex.instance.discordClient.user)
+                return;
+
+            let isMainChannel = false;
+
+            if(reaction.message.guild.channels.get(reaction.message.channel.id).name == conf.getConfig().mainChannel){
+                isMainChannel = true;
+            }
+
             let guild = reaction.message.guild;
             let guildGameManager = MainIndex.instance.guildGameManagerByGuild(guild);
+            let game;
 
+            if(isMainChannel) {
+                for(let ga in guildGameManager.games) {
+                    if(reaction.message.id == guildGameManager.games[ga].createMessage.id) {
+                        game = guildGameManager.games[ga];
+                        break;
+                    }
+                }
 
+                if(game == null) {
+                    return;
+                }
+
+                if(game.leader.dcUser.id != user.id)
+                    game.kickUser(reaction.message.guild.members.get(user.id));
+            }
         });
 
         //MESSAGE HANDLER
