@@ -1,7 +1,7 @@
 //Req
 
 // Utils
-import {DiscordHandler} from "./src/events/listener";
+import {DiscordHandler} from "./src/events/discordHandler";
 import Discord = require("discord.js");
 import conf = require("./src/utils/config");
 import {GuildGameManager} from "./src/server/guild";
@@ -55,6 +55,16 @@ export class MainIndex {
 
     get guildGameManager(): Array<GuildGameManager> {
         return this._guildGameManager;
+    }
+
+    guildGameManagerByGuild(guild: Discord.Guild){
+        for(let g in this.guildGameManager){
+            let ggm = this.guildGameManager[g];
+            if(ggm.guild.id == guild.id){
+                return ggm;
+            }
+        }
+        return null;
     }
 
     static get instance() {

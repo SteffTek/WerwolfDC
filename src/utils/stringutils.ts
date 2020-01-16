@@ -6,15 +6,15 @@ export module stringutils {
 
 
     //FIXME
-    export function listCustomEmojis(content: string): string[] {
+    export function listCustomEmojis(content: string) {
         let tmp = customEmojiRegEx.exec(content.trim());
-        console.log(customEmojiRegEx.exec(content.trim()));
-        return tmp === null ? [] : tmp;
+        //console.log(tmp[0]);
+        return tmp;
     }
 
-    export function listEmojis(content: string): string[] {
+    export function listEmojis(content: string) {
         let tmp = emojiRegEx.exec(content.trim());
-        console.log(tmp);
-        return tmp === null ? [] : tmp;
+       // console.log(tmp.index);
+        return tmp;
     }
 }

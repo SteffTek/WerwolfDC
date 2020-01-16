@@ -4,6 +4,8 @@ import {logger} from "../utils/logger";
 import "./cmd_creategame"
 import conf = require("../utils/config");
 import {cmd_creategame} from "./cmd_creategame";
+import {cmd_next} from "./cmd_next";
+import {cmd_close} from "./cmd_close";
 
 export class CommandManager {
 
@@ -11,6 +13,7 @@ export class CommandManager {
 
     constructor() {
         this.add(new cmd_creategame());
+        this.add(new cmd_close());
     }
 
     add(command: Command) {

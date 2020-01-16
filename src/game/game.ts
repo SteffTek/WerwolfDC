@@ -1,6 +1,7 @@
 import Discord = require('discord.js');
 import {User} from "./user";
 import {constants} from "../utils/const";
+import conf = require("../utils/config");
 
 enum GamePhase {
     created,
@@ -118,13 +119,13 @@ export class Game {
 
     close() {
         //RESET CHANNEL
-        this.userChannelMap.get("Category").delete();
         this.userChannelMap.get("Spielleitung").delete();
         this.userChannelMap.get("GameChat").delete();
         this.userChannelMap.get("Abstimmungen").delete();
         this.userChannelMap.get("Totenchat").delete();
         this.userChannelMap.get("Dorf").delete();
         this.userChannelMap.get("Tot").delete();
+        this.userChannelMap.get("Category").delete();
 
         //RESET SPECIAL CHANNEL
         let specialChats = this.userChannelMap.get("specialChats");
@@ -134,9 +135,10 @@ export class Game {
         }
 
         //RESET USERS
-        this.users.forEach((user) => {
+        for(let u in this.users){
+            let user = this.users[u];
             user.reset();
-        });
+        }
         this.users = [];
 
         //RESET ROLES

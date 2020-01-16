@@ -2,6 +2,8 @@ import Discord = require('discord.js');
 import {Game} from "../game/game";
 import {User} from "../game/user";
 import {logger} from "../utils/logger";
+import conf = require("../utils/config");
+
 export class GuildGameManager {
 
     guild: Discord.Guild;
@@ -10,7 +12,7 @@ export class GuildGameManager {
 
     constructor(guild: Discord.Guild){
         this.guild = guild;
-        this.gameInviteChannel = guild.channels.find("name", "spielankündigungen");
+        this.gameInviteChannel = guild.channels.find("name", conf.getConfig().mainChannel);
         this.games = {};
     }
 

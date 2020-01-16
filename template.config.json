@@ -1,3 +1,5 @@
 {
-    "token":""
+    "token": "",
+    "prefix": "!",
+    "mainChannel": "spielankündigung"
 }

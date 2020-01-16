@@ -30,9 +30,6 @@ export class DiscordHandler {
 
             //this._guilds[0].createGame(emo[0], msg.member);
 
-            console.log("---");
-            console.log(stringutils.listEmojis(msg.content));
-
             MainIndex.instance.commandManager.handleMessage(msg);
         });
 
