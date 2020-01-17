@@ -1,6 +1,7 @@
 "use strict";
 import Discord = require("discord.js");
 import { Game } from "../game/game";
+import { User } from "../game/user";
 import stringSimilarity = require('string-similarity');
 
 export module constants {
@@ -39,5 +40,25 @@ export module constants {
         }
 
         return null;
+    }
+
+    export function selfDestructingMessage(channel: Discord.TextChannel, string: string, time: number = 3000) {
+        let message;
+        channel.send(string).then(msg => {
+            message = msg;
+
+            if(time > 0)
+                message.delete(time);
+        });
+    }
+
+    export function privateSelfDestructingMessage(user: User, string: string, time: number = 3000) {
+        let message;
+        user.dcUser.send(string).then(msg => {
+            message = msg;
+            
+            if(time > 0)
+                message.delete(time);
+        });
     }
 }

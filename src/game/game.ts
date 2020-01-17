@@ -113,9 +113,9 @@ export class Game {
 
             //Im Spielleiter Channel Message erstellen
             this.userChannelMap.get("Spielleitung").send(user.dcUser.displayName + " - " + user.role).then( message => {
-                message.react(":skull:");
-                message.react(":green_heart:");
-                message.react(":ok_hand:");
+                message.react("💀");
+                message.react("💚");
+                message.react("👌");
                 this.userActions[user.dcUser.id] = message;
             })
         }
@@ -124,23 +124,7 @@ export class Game {
     close() {
         //RESET SPECIAL CHANNEL
         this.resetSpecialChannels();
-
-        //RESET CHANNEL
-        this.userChannelMap.get("Spielleitung").delete().then(success => {
-            this.userChannelMap.get("GameChat").delete().then(success => {
-                this.userChannelMap.get("Abstimmungen").delete().then(success => {
-                    this.userChannelMap.get("Totenchat").delete().then(success => {
-                        this.userChannelMap.get("Dorf").delete().then(success => {
-                            this.userChannelMap.get("Tot").delete().then(success => {
-                                this.userChannelMap.get("Category").delete().then(success => {
-                                    //FERTIG
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
+        this.resetChannels();
 
         //RESET USERS
         for(let u in this.users){
@@ -157,6 +141,53 @@ export class Game {
 
         //Remove Invite Message
         this.createMessage.delete();
+    }
+
+    handleReaction(dcReaction: Discord.MessageReaction, dcUser: Discord.User){
+        //Ignore when not Result
+        if(this.gamePhase != GamePhase.ingame){
+            return;
+        }
+
+        //Check if Leader
+        let leader = this.leader;
+        if(leader.dcUser.id != dcUser.id){
+            return;
+        }
+
+        let emojiString = dcReaction.emoji.toString();
+
+        let id = this.getReactedUser(dcReaction.message);
+        let user = this.getUser(id);
+
+        if(user == null) {
+            return;
+        }
+
+        if(emojiString == "💀") {
+            //IF DEATH
+            user.alive = false;
+        } else if(emojiString =="👌") {
+            //IF MAYOR
+            if(this.getMayor != null) {
+                this.getMayor().isMayor = false;
+            }
+            user.isMayor = true;
+        } else if(emojiString =="💚") {
+            //IF ALIVE
+            user.alive = true;
+        }
+
+    }
+
+    getReactedUser(dcMessage: Discord.Message) {
+        for(let userID in this.userActions) {
+            let msg = this.userActions[userID];
+            if(msg.id == dcMessage.id) {
+                return userID;
+            }
+        }
+        return null;
     }
 
     listUsers(showRole: boolean): Array<string> {
@@ -254,10 +285,34 @@ export class Game {
     resetSpecialChannels() {
         //RESET SPECIAL CHANNEL
         let specialChats = this.userChannelMap.get("specialChats");
-        for(var i in specialChats) {
+        let i = 0;
+        function recursion() {
             let chat = specialChats[i];
-            this.guild.channels.get(chat.name).delete();
+            specialChats[i].delete().then(() => {
+                i++;
+                if(i < specialChats.length) {
+                    recursion();
+                }
+            });
         }
+    }
+
+    resetChannels() {
+        this.userChannelMap.get("Spielleitung").delete().then(success => {
+            this.userChannelMap.get("GameChat").delete().then(success => {
+                this.userChannelMap.get("Abstimmungen").delete().then(success => {
+                    this.userChannelMap.get("Totenchat").delete().then(success => {
+                        this.userChannelMap.get("Dorf").delete().then(success => {
+                            this.userChannelMap.get("Tot").delete().then(success => {
+                                this.userChannelMap.get("Category").delete().then(success => {
+                                    //FERTIG
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
     }
 
     set setRoles(array: Array<string>) {
@@ -290,5 +345,39 @@ export class Game {
                 this.userChannelMap.get("specialChats").push(chan);
             })
         }
+    }
+
+    getUser(id: string) {
+        for(let u in this.users){
+            let user = this.users[u];
+
+            if(user.dcUser.id == id){
+                return user;
+            }
+        }
+        return null;
+    }
+
+    getMayor(): User {
+        for(let u in this.users){
+            let user = this.users[u];
+
+            if(user.isMayor){
+                return user;
+            }
+        }
+        return null;
+    }
+
+    getAlive(): Object {
+        let array = {};
+
+        for(let u in this.users){
+            if(this.users[u].alive) {
+                array[this.users[u].dcUser.id] = this.users[u];
+            }
+        }
+
+        return array;
     }
 }

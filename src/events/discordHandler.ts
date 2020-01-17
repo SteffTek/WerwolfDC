@@ -53,6 +53,8 @@ export class DiscordHandler {
                     return;
                 }
 
+                console.log(reaction.emoji.toString());
+
                 if(game.leader.dcUser.id != user.id)
                     game.addUser(reaction.message.guild.members.get(user.id));
             }
