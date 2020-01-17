@@ -112,5 +112,6 @@ export class User {
         this._dcUser.removeRole(constants.deadRole(this._game.guild, this._game.id));
         this._dcUser.removeRole(constants.aliveRole(this._game.guild, this._game.id));
         this._dcUser.removeRole(constants.leaderRole(this._game.guild, this._game.id));
+        this._dcUser.removeRole(constants.mayorRole(this._game.guild, this._game.id));
     }
 }

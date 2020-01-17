@@ -61,12 +61,12 @@ export class Poll {
                         let strAnklage = "\n";
                         for(let a in this._accused) {
                             let user = this._game.getUser(this._accused[a]);
-                            strAnklage += user.dcUser.displayName + "\n";
+                            strAnklage += "- " + user.dcUser.displayName + "\n";
                         }
 
                         for(let u in this._game.users){
                             let user = this._game.users[u];
-                            user.dcUser.send("Anklage erhoben gegen:\n" + strAnklage + "\n\nBitte hier eine Wahl treffen.");
+                            user.dcUser.send("Anklage erhoben gegen:\n" + strAnklage + "\nBitte hier eine Wahl treffen.");
                         }
                     }
                 });
@@ -105,7 +105,7 @@ export class Poll {
 
         var votes = {} // ACCUSED ID : COUNT
         var voters = this._game.getAlive();
-        for(let v in votes) {
+        for(let v in voters) {
             let voter = this._game.getUser(v);
 
             if(this._votes.hasOwnProperty(voter.dcUser.id)){
@@ -158,12 +158,15 @@ export class Poll {
         .setTitle("Enthaltungen:")
         .setDescription(enthaltungen);
 
-        this._channel.send(embedEnthaltung);
-
-        this._currentReactionMessage.clearReactions();
-        this._channel.send("```fix\n- - - Fertig - - -\n```").then((msg: Discord.Message) => {
-            this._currentReactionMessage = msg;
-            msg.react("👌");
+        //SEND ENTHALTUNG
+        this._channel.send(embedEnthaltung).then( msg => {
+            //RESET REACTION MESSAGE
+            this._currentReactionMessage.clearReactions();
+            //POST NEW REACTION MESSAGE
+            this._channel.send("```fix\n- - - Fertig - - -\n```").then((msg: Discord.Message) => {
+                this._currentReactionMessage = msg;
+                msg.react("👌");
+            });
         });
     }
 
@@ -190,7 +193,7 @@ export class Poll {
                 user.alive = false;
             } else if(emojiString =="👌") {
                 //IF MAYOR
-                if(this._game.getMayor != null) {
+                if(this._game.getMayor() != null) {
                     this._game.getMayor().isMayor = false;
                 }
                 user.isMayor = true;
@@ -223,30 +226,32 @@ export class Poll {
             return;
         }
 
-        if(this._game.getUser(dcMessage.member.id) == null) {
+        if(this._game.getUser(dcMessage.author.id) == null) {
             return;
         }
 
-        if(!this._game.getUser(dcMessage.member.id).alive) {
+        if(!this._game.getUser(dcMessage.author.id).alive) {
             return;
         }
 
-        if(this._private && dcMessage.guild != null) {
-            return;
+        if(this.pollPhase == PollPhase.voting){
+            if(this._private && dcMessage.guild != null) {
+                return;
+            }
         }
-
 
         if(this.pollPhase == PollPhase.accuse) {
-            let author = this._game.getUser(dcMessage.member.id);
+            let author = this._game.getUser(dcMessage.author.id);
             this.accuse(dcMessage.content, author);
         }
 
         if(this.pollPhase == PollPhase.voting) {
-            let author = this._game.getUser(dcMessage.member.id);
+            let author = this._game.getUser(dcMessage.author.id);
             this.vote(dcMessage.content, author);
         }
 
-        dcMessage.delete();
+        if(dcMessage.guild != null)
+            dcMessage.delete();
     }
 
     //VOTING
@@ -282,9 +287,9 @@ export class Poll {
             this._votes[voter.dcUser.id] = user.dcUser.id;
             if(this._private){
                 constants.privateSelfDestructingMessage(voter, "Du hast dich für **" + user.dcUser.displayName + "** umentschieden!", 0);
-                this._voteMessages[voter.dcUser.id].edit = voter.dcUser.displayName + " hat sich umentschieden.";
+                this._voteMessages[voter.dcUser.id].edit(voter.dcUser.displayName + " hat sich umentschieden.");
             } else {
-                this._voteMessages[voter.dcUser.id].edit = voter.dcUser.displayName + " hat sich für **" + user.dcUser.displayName + "** umentschieden.";
+                this._voteMessages[voter.dcUser.id].edit(voter.dcUser.displayName + " hat sich für **" + user.dcUser.displayName + "** umentschieden.");
             }
             return;
         }

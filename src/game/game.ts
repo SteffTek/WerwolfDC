@@ -401,8 +401,17 @@ export class Game {
         var instantiated = 0;
 
         //Create Roles
+        if(instantiated == 0)
         if(constants.leaderRole(this.guild, this.id) == null) {
             this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE", hoist: true}).then(role => {
+                instantiated++;
+            });
+        } else {
+            instantiated++;
+        }
+
+        if(constants.mayorRole(this.guild, this.id) == null) {
+            this.guild.createRole({name:"Bürgermeister #" + this.id, color: "GOLD", hoist: true}).then(role => {
                 instantiated++;
             });
         } else {
@@ -419,14 +428,6 @@ export class Game {
 
         if(constants.deadRole(this.guild, this.id) == null) {
             this.guild.createRole({name:"Tod #" + this.id, color: "RED", hoist: true}).then(role => {
-                instantiated++;
-            });
-        } else {
-            instantiated++;
-        }
-
-        if(constants.mayorRole(this.guild, this.id) == null) {
-            this.guild.createRole({name:"Bürgermeister #" + this.id, color: "GOLD", hoist: true}).then(role => {
                 instantiated++;
             });
         } else {

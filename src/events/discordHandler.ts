@@ -139,7 +139,6 @@ export class DiscordHandler {
                 return;
             }
 
-
             //CHECK IF IN POLL
             for(let gu in MainIndex.instance.guildGameManager) {
                 let guild = MainIndex.instance.guildGameManager[gu];
@@ -149,22 +148,36 @@ export class DiscordHandler {
                 for (let g in guild.games) {
                     //GET GAME
                     let gm = guild.games[g];
-                    if(gm.checkIfMessageFromGame(msg) == "poll") {
-                        game = gm;
-                        break;
+                    for(let u in gm.users) {
+                        let usr = gm.users[u];
+
+                        if(usr.dcUser.id == msg.author.id) {
+                            game = gm;
+                            break;
+                        }
                     }
                 }
+
+                console.log(game);
 
                 if(game == null) {
                     return;
                 }
 
+                console.log("text")
+
                 for(let p in game.polls) {
                     let poll = game.polls[p];
 
                     if(poll.channel.id == msg.channel.id) {
+                        console.log("oof");
                         poll.handleMessage(msg);
                         break;
+                    //PRIVAT CHAT
+                    } else if(msg.guild == null){
+                        if(poll.channel.id == game.userChannelMap.get("Abstimmungen").id){
+                            poll.handleMessage(msg);
+                        }
                     }
                 }
             }
