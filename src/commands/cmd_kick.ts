@@ -15,6 +15,10 @@ export class cmd_kick extends Command {
 
         let user: string = dcMessage.content.split(" ", 2)[1];
         let guild = dcMessage.guild;
+        if(guild == null) {
+            return;
+        }
+
         let id = -1;
 
         let guildManager: GuildGameManager = MainIndex.instance.guildGameManagerByGuild(guild);

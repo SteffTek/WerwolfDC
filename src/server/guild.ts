@@ -12,7 +12,7 @@ export class GuildGameManager {
 
     constructor(guild: Discord.Guild){
         this.guild = guild;
-        this.gameInviteChannel = guild.channels.find("name", conf.getConfig().mainChannel);
+        this.gameInviteChannel = guild.channels.find(channel => channel.name === conf.getConfig().mainChannel);
         this.games = {};
     }
 

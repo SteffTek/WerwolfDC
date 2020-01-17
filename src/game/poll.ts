@@ -36,10 +36,14 @@ export class Poll {
         this._resultMessages = {} //ACCUSED.DCUSER.ID : DISCORD.MESSAGE
         this.pollPhase = PollPhase.accuse;
 
-        this._channel.send("```diff --- Anklage ---").then(function(msg: Discord.Message) {
+        this._channel.send("```cs\n# - - - Anklage - - -\n```").then((msg: Discord.Message) => {
             this._currentReactionMessage = msg;
             msg.react("👌");
         });
+    }
+
+    get channel(): Discord.TextChannel {
+        return this._channel;
     }
 
     nextPollPhase() {
@@ -49,7 +53,7 @@ export class Poll {
             this.pollPhase = PollPhase.voting;
 
             this._currentReactionMessage.clearReactions();
-            this._channel.send("```fix --- Voting ---").then(function(msg: Discord.Message) {
+            this._channel.send("```md\n# - - - Voting - - -\n```").then((msg: Discord.Message) => {
                 this._currentReactionMessage = msg;
                 msg.react("👌");
             });
@@ -58,7 +62,7 @@ export class Poll {
         if(this.pollPhase == PollPhase.voting) {
             this.pollPhase = PollPhase.result;
             this._currentReactionMessage.clearReactions();
-            this._channel.send("```md --- Ergebnis ---");
+            this._channel.send("```py\n# - - - Ergebnis - - -\n```");
             this.printResult();
         }
 
@@ -113,7 +117,7 @@ export class Poll {
                 .addField("Gewählt durch: ", string, true)
                 .addField("Stimmen:", votes[vote], true);
 
-            this._channel.send(embed).then(function(msg: Discord.Message) {
+            this._channel.send(embed).then((msg: Discord.Message) => {
                 msg.react("💀");
                 msg.react("👌");
 
@@ -134,7 +138,7 @@ export class Poll {
         .setDescription(enthaltungen);
 
         this._currentReactionMessage.clearReactions();
-        this._channel.send("```py --- Voting ---").then(function(msg: Discord.Message) {
+        this._channel.send("```fix\n- - - Fertig - - -\n```").then((msg: Discord.Message) => {
             this._currentReactionMessage = msg;
             msg.react("👌");
         });
@@ -161,17 +165,17 @@ export class Poll {
             if(emojiString == "👌") {
                 this.pollPhase
             }
-        }
-
-        if(emojiString == "💀") {
-            //IF DEATH
-            user.alive = false;
-        } else if(emojiString =="👌") {
-            //IF MAYOR
-            if(this._game.getMayor != null) {
-                this._game.getMayor().isMayor = false;
+        } else {
+            if(emojiString == "💀") {
+                //IF DEATH
+                user.alive = false;
+            } else if(emojiString =="👌") {
+                //IF MAYOR
+                if(this._game.getMayor != null) {
+                    this._game.getMayor().isMayor = false;
+                }
+                user.isMayor = true;
             }
-            user.isMayor = true;
         }
 
         //Reset Reactions

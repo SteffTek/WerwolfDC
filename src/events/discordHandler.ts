@@ -2,7 +2,7 @@ import {logger} from "../utils/logger";
 import {GuildGameManager} from "../server/guild";
 import conf = require("../utils/config");
 import Discord = require("discord.js");
-
+import {Game} from "../game/game";
 import {MainIndex} from "../../index";
 import {stringutils} from "../utils/stringutils";
 import {type} from "os";
@@ -31,6 +31,11 @@ export class DiscordHandler {
             if(user == MainIndex.instance.discordClient.user)
                 return;
 
+            if(reaction.message.channel.type != "text")
+                return;
+
+            console.log("test");
+
             let isMainChannel = false;
 
             if(reaction.message.guild.channels.get(reaction.message.channel.id).name == conf.getConfig().mainChannel){
@@ -39,7 +44,8 @@ export class DiscordHandler {
 
             let guild = reaction.message.guild;
             let guildGameManager = MainIndex.instance.guildGameManagerByGuild(guild);
-            let game;
+            let game: Game;
+            let gameStatus;
 
             if(isMainChannel) {
                 for(let ga in guildGameManager.games) {
@@ -53,15 +59,47 @@ export class DiscordHandler {
                     return;
                 }
 
-                console.log(reaction.emoji.toString());
-
                 if(game.leader.dcUser.id != user.id)
                     game.addUser(reaction.message.guild.members.get(user.id));
+            } else {
+
+                //IF NOT
+                for (let g in guildGameManager.games) {
+                    //GET GAME
+                    let gm = guildGameManager.games[g];
+                    gameStatus = gm.checkIfReactionFromGame(reaction);
+                    if(gameStatus != "") {
+                        game = gm;
+                        return;
+                    }
+                }
+
+                if(gameStatus == "" || gameStatus == null) {
+                    return;
+                }
+
+                //GAME GOTTEN
+                if(gameStatus == "poll") {
+                    for(let p in game.polls){
+                        let poll = game.polls[p];
+
+                        if(poll.channel.id == reaction.message.channel.id) {
+                            poll.handleReaction(reaction, user);
+                            return;
+                        }
+                    }
+                } else if(gameStatus == "game") {
+                    game.handleReaction(reaction, user);
+                }
             }
         });
+
         MainIndex.instance.discordClient.on('messageReactionRemove', (reaction, user) => {
 
             if(user == MainIndex.instance.discordClient.user)
+                return;
+
+            if(reaction.message.channel.type != "text")
                 return;
 
             let isMainChannel = false;

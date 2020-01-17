@@ -1,9 +1,10 @@
 import Discord = require('discord.js');
 import {User} from "./user";
+import {Poll, PollPhase} from "./poll";
 import {constants} from "../utils/const";
 import conf = require("../utils/config");
 
-enum GamePhase {
+export enum GamePhase {
     created,
     rolechecking,
     ingame,
@@ -22,6 +23,7 @@ export class Game {
     users: Array<User>;
     roles: Array<string>;
     userActions: Object;
+    polls: Array<Poll>
 
     constructor(id: number, guild: Discord.Guild, emoji: string, dcLeader: Discord.GuildMember, createMessage: Discord.Message){
         this.guild = guild;
@@ -30,6 +32,7 @@ export class Game {
         this.createMessage = createMessage;
         this.gamePhase = GamePhase.created;
         this.users = [];
+        this.polls = [];
 
         //Create Roles
         this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE"}).then(role => {
@@ -41,7 +44,7 @@ export class Game {
                     })
                 })
             })
-        });
+        })
     }
 
     //Create Ranks and Channels
@@ -141,6 +144,32 @@ export class Game {
 
         //Remove Invite Message
         this.createMessage.delete();
+    }
+
+    createPoll(dcChannel: Discord.Channel) {
+
+        var channel: Discord.TextChannel;
+        var specialChats = this.userChannelMap.get("specialChats");
+        for(let c in specialChats) {
+            let chat = specialChats[c];
+
+            if(chat.id == dcChannel.id) {
+                channel = chat;
+                break;
+            }
+        }
+
+        if(dcChannel.id == this.userChannelMap.get("Abstimmungen").id) {
+            channel = this.userChannelMap.get("Abstimmungen");
+        }
+
+        if(channel == null) {
+            return false;
+        }
+
+        this.polls.push(new Poll(this, channel));
+        return true;
+
     }
 
     handleReaction(dcReaction: Discord.MessageReaction, dcUser: Discord.User){
@@ -298,20 +327,10 @@ export class Game {
     }
 
     resetChannels() {
-        this.userChannelMap.get("Spielleitung").delete().then(success => {
-            this.userChannelMap.get("GameChat").delete().then(success => {
-                this.userChannelMap.get("Abstimmungen").delete().then(success => {
-                    this.userChannelMap.get("Totenchat").delete().then(success => {
-                        this.userChannelMap.get("Dorf").delete().then(success => {
-                            this.userChannelMap.get("Tot").delete().then(success => {
-                                this.userChannelMap.get("Category").delete().then(success => {
-                                    //FERTIG
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+        this.userChannelMap.forEach((value: Discord.Channel, key: string) => {
+            if(key != "specialChats") {
+                value.delete();
+            }
         });
     }
 
@@ -340,7 +359,7 @@ export class Game {
             }
 
             //Special Channel
-            this.guild.createChannel(chat, {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) }]}).then(chan => {
+            this.guild.createChannel(chat, {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) }]}).then((chan: Discord.TextChannel) => {
                 chan.setParent(this.userChannelMap.get("Category").id);
                 this.userChannelMap.get("specialChats").push(chan);
             })
@@ -379,5 +398,27 @@ export class Game {
         }
 
         return array;
+    }
+
+    checkIfReactionFromGame(dcReaction: Discord.MessageReaction) {
+        let channelID = dcReaction.message.channel.id;
+
+        if(this.userChannelMap.get("Spielleitung").id == channelID) {
+            return "game";
+        }
+
+        if(this.userChannelMap.get("Abstimmungen").id == channelID) {
+            return "poll";
+        }
+
+        for(let p in this.polls) {
+            let poll = this.polls[p];
+
+            if(poll.channel.id == channelID){
+                return "poll";
+            }
+        }
+
+        return "";
     }
 }

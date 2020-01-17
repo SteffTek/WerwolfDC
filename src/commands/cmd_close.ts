@@ -13,6 +13,9 @@ export class cmd_close extends Command {
     execute(dcMessage: Discord.Message) {
         let user = dcMessage.member;
         let guild = dcMessage.guild;
+        if(guild == null) {
+            return;
+        }
         let id = -1;
 
         let guildManager: GuildGameManager = MainIndex.instance.guildGameManagerByGuild(guild);

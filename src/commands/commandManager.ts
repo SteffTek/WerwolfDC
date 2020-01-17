@@ -7,6 +7,7 @@ import {cmd_creategame} from "./cmd_creategame";
 import {cmd_next} from "./cmd_next";
 import {cmd_close} from "./cmd_close";
 import {cmd_kick} from "./cmd_kick";
+import {cmd_poll} from "./cmd_poll";
 
 export class CommandManager {
 
@@ -16,6 +17,7 @@ export class CommandManager {
         this.add(new cmd_creategame());
         this.add(new cmd_close());
         this.add(new cmd_kick());
+        this.add(new cmd_poll());
     }
 
     add(command: Command) {
