@@ -51,6 +51,15 @@ export class cmd_creategame extends Command {
             }
         }
 
+        for(let gm in MainIndex.instance.guildGameManagerByGuild(dcMessage.guild).games){
+            let game = MainIndex.instance.guildGameManagerByGuild(dcMessage.guild).games[gm];
+            
+            if(game.leader.dcUser.id == dcMessage.member.id) {
+                dcMessage.member.send("Du leitest bereits ein Spiel auf diesem Server!");
+                return;
+            }
+        }
+
         let tmpMsg;
         dcMessage.channel.send(dcMessage.content.substr(8).toString()).then(msg => {
             tmpMsg = msg;

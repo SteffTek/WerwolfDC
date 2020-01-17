@@ -22,7 +22,6 @@ export class cmd_close extends Command {
         dcMessage.delete();
 
         for(var game in guildManager.games){
-            console.log(game);
             if(guildManager.games[game].leader.dcUser == user){
                 id = parseInt(game);
                 break;

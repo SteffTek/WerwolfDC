@@ -34,8 +34,6 @@ export class DiscordHandler {
             if(reaction.message.channel.type != "text")
                 return;
 
-            console.log("test");
-
             let isMainChannel = false;
 
             if(reaction.message.guild.channels.get(reaction.message.channel.id).name == conf.getConfig().mainChannel){
@@ -62,7 +60,6 @@ export class DiscordHandler {
                 if(game.leader.dcUser.id != user.id)
                     game.addUser(reaction.message.guild.members.get(user.id));
             } else {
-
                 //IF NOT
                 for (let g in guildGameManager.games) {
                     //GET GAME
@@ -70,7 +67,7 @@ export class DiscordHandler {
                     gameStatus = gm.checkIfReactionFromGame(reaction);
                     if(gameStatus != "") {
                         game = gm;
-                        return;
+                        break;
                     }
                 }
 
@@ -84,6 +81,7 @@ export class DiscordHandler {
                         let poll = game.polls[p];
 
                         if(poll.channel.id == reaction.message.channel.id) {
+
                             poll.handleReaction(reaction, user);
                             return;
                         }
@@ -136,7 +134,40 @@ export class DiscordHandler {
 
             //this._guilds[0].createGame(emo[0], msg.member);
 
-            MainIndex.instance.commandManager.handleMessage(msg);
+            if(msg.content.startsWith(conf.getConfig().prefix)) {
+                MainIndex.instance.commandManager.handleMessage(msg);
+                return;
+            }
+
+
+            //CHECK IF IN POLL
+            for(let gu in MainIndex.instance.guildGameManager) {
+                let guild = MainIndex.instance.guildGameManager[gu];
+
+                let game: Game;
+
+                for (let g in guild.games) {
+                    //GET GAME
+                    let gm = guild.games[g];
+                    if(gm.checkIfMessageFromGame(msg) == "poll") {
+                        game = gm;
+                        break;
+                    }
+                }
+
+                if(game == null) {
+                    return;
+                }
+
+                for(let p in game.polls) {
+                    let poll = game.polls[p];
+
+                    if(poll.channel.id == msg.channel.id) {
+                        poll.handleMessage(msg);
+                        break;
+                    }
+                }
+            }
         });
 
         //BOT JOIN SERVER HANDLER

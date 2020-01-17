@@ -25,7 +25,6 @@ export class cmd_kick extends Command {
         dcMessage.delete();
 
         for (let game in guildManager.games) {
-            console.log(game);
             if (guildManager.games[game].leader.dcUser == dcMessage.member) {
                 id = parseInt(game);
                 break;

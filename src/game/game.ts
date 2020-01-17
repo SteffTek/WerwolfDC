@@ -35,15 +35,10 @@ export class Game {
         this.polls = [];
 
         //Create Roles
-        this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE"}).then(role => {
-            this.guild.createRole({name:"Lebendig #" + this.id, color: "GREEN"}).then(role => {
-                this.guild.createRole({name:"Tod #" + this.id, color: "RED"}).then(role => {
-                    this.guild.createRole({name:"Bürgermeister #" + this.id, color: "GOLD"}).then(role => {
-                        this.leader = new User(dcLeader, this, true);
-                        this.create();
-                    })
-                })
-            })
+
+        this.createRoles(this, function(game: Game){
+            game.leader = new User(dcLeader, game, true);
+            game.create();
         })
     }
 
@@ -55,49 +50,8 @@ export class Game {
         //Set Leader
         this.leader.isLeader = true;
 
-        //Create Channels
-        this.guild.createChannel("Dorf #" + this.id, {type: "category"}).then(village => {
-            this.userChannelMap.set("Category", village);
-
-            //SPIELLEITER
-            this.guild.createChannel("Spielleitung", {type: "text", permissionOverwrites: [{id: this.guild.defaultRole.id, deny: ["VIEW_CHANNEL"] },{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(this.guild, this.id), deny: ["VIEW_CHANNEL"] }]}).then(chan => {
-                chan.setParent(village.id);
-                this.userChannelMap.set("Spielleitung", chan);
-            })
-
-            //GameChat
-            this.guild.createChannel("GameChat", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id) },{ id: constants.deadRole(this.guild, this.id), deny: ["SEND_MESSAGES"] }]}).then(chan => {
-                chan.setParent(village.id);
-                this.userChannelMap.set("GameChat", chan);
-            })
-
-            //Polls
-            this.guild.createChannel("Abstimmungen", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id) },{ id: constants.deadRole(this.guild, this.id), deny: ["SEND_MESSAGES"] }]}).then(chan => {
-                chan.setParent(village.id);
-                this.userChannelMap.set("Abstimmungen", chan);
-            })
-
-            //Dead
-            this.guild.createChannel("Totenchat", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(this.guild, this.id) }]}).then(chan => {
-                chan.setParent(village.id);
-                this.userChannelMap.set("Totenchat", chan);
-            })
-
-            //VOICE
-            //VILLAGE
-            this.guild.createChannel("Dorf", {type: "voice", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id) },{ id: constants.deadRole(this.guild, this.id) }]}).then(chan => {
-                chan.setParent(village.id);
-                this.userChannelMap.set("Dorf", chan);
-            })
-
-            //DEAD
-            this.guild.createChannel("Tot", {type: "voice", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) },{ id: constants.aliveRole(this.guild, this.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(this.guild, this.id) }]}).then(chan => {
-                chan.setParent(village.id);
-                this.userChannelMap.set("Tot", chan);
-            })
-
-        })
-
+        //Create Channel
+        this.createChannel();
     }
 
     start() {
@@ -136,11 +90,13 @@ export class Game {
         }
         this.users = [];
 
+        this.leader.reset();
+
         //RESET ROLES
-        constants.leaderRole(this.guild, this.id).delete();
+        /*constants.leaderRole(this.guild, this.id).delete();
         constants.aliveRole(this.guild, this.id).delete();
         constants.deadRole(this.guild, this.id).delete();
-        constants.mayorRole(this.guild, this.id).delete();
+        constants.mayorRole(this.guild, this.id).delete();*/
 
         //Remove Invite Message
         this.createMessage.delete();
@@ -148,6 +104,7 @@ export class Game {
 
     createPoll(dcChannel: Discord.Channel) {
 
+        var privatePoll = false;
         var channel: Discord.TextChannel;
         var specialChats = this.userChannelMap.get("specialChats");
         for(let c in specialChats) {
@@ -161,13 +118,14 @@ export class Game {
 
         if(dcChannel.id == this.userChannelMap.get("Abstimmungen").id) {
             channel = this.userChannelMap.get("Abstimmungen");
+            privatePoll = true;
         }
 
         if(channel == null) {
             return false;
         }
 
-        this.polls.push(new Poll(this, channel));
+        this.polls.push(new Poll(this, channel, privatePoll));
         return true;
 
     }
@@ -230,7 +188,6 @@ export class Game {
 
     kickUser(dcUser: Discord.GuildMember) {
         for(let u in this.users) {
-            console.log(u);
             var user = this.users[u];
 
             if(user.dcUser == dcUser) {
@@ -253,7 +210,6 @@ export class Game {
 
     addUser(dcUser: Discord.GuildMember, role: string = null): boolean {
         for(var u in this.users) {
-            console.log(u);
             var user = this.users[u];
 
             if(user.dcUser == dcUser) {
@@ -329,7 +285,7 @@ export class Game {
     resetChannels() {
         this.userChannelMap.forEach((value: Discord.Channel, key: string) => {
             if(key != "specialChats") {
-                value.delete();
+                //value.delete();
             }
         });
     }
@@ -420,5 +376,147 @@ export class Game {
         }
 
         return "";
+    }
+
+    checkIfMessageFromGame(dcMessage: Discord.Message) {
+        let channelID = dcMessage.channel.id;
+
+        if(this.userChannelMap.get("Abstimmungen").id == channelID) {
+            return "poll";
+        }
+
+        for(let p in this.polls) {
+            let poll = this.polls[p];
+
+            if(poll.channel.id == channelID){
+                return "poll";
+            }
+        }
+
+        return "";
+    }
+
+    //Manage Roles
+    createRoles(game: Game, _callback) {
+        var instantiated = 0;
+
+        //Create Roles
+        if(constants.leaderRole(this.guild, this.id) == null) {
+            this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE", hoist: true}).then(role => {
+                instantiated++;
+            });
+        } else {
+            instantiated++;
+        }
+
+        if(constants.aliveRole(this.guild, this.id) == null) {
+            this.guild.createRole({name:"Lebendig #" + this.id, color: "GREEN", hoist: true}).then(role => {
+                instantiated++;
+            });
+        } else {
+            instantiated++;
+        }
+
+        if(constants.deadRole(this.guild, this.id) == null) {
+            this.guild.createRole({name:"Tod #" + this.id, color: "RED", hoist: true}).then(role => {
+                instantiated++;
+            });
+        } else {
+            instantiated++;
+        }
+
+        if(constants.mayorRole(this.guild, this.id) == null) {
+            this.guild.createRole({name:"Bürgermeister #" + this.id, color: "GOLD", hoist: true}).then(role => {
+                instantiated++;
+            });
+        } else {
+            instantiated++;
+        }
+
+
+        while(instantiated < 4){}
+
+        _callback(game);
+    }
+
+    createChannel() {
+
+        let village = this.guild.channels.find(channel => channel.name === "Dorf #" + this.id);
+        let children = [];
+
+        //IF VILLAGE DOESNT EXIST
+        if(village == null) {
+            //CREATE
+            this.guild.createChannel("Dorf #" + this.id, {type: "category"}).then( vill => {
+                this.userChannelMap.set("Category", vill);
+                village = vill
+                create(this);
+            });
+        } else {
+            create(this);
+        }
+
+        function create(game: Game) {
+            //SPIELLEITUNG
+            if(game.guild.channels.find(channel => channel.name === "spielleitung" && channel.parentID === village.id) == null) {
+                game.guild.createChannel("spielleitung", {type: "text", permissionOverwrites: [{id: game.guild.defaultRole.id, deny: ["VIEW_CHANNEL"] },{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] }]}).then(chan => {
+                    chan.setParent(village.id);
+                    game.userChannelMap.set("Spielleitung", chan);
+                })
+            } else {
+                game.userChannelMap.set("Spielleitung", game.guild.channels.find(channel => channel.name === "spielleitung" && channel.parentID === village.id));
+            }
+
+            //GAMECHAT
+            if(game.guild.channels.find(channel => channel.name === "gamechat" && channel.parentID === village.id) == null) {
+                game.guild.createChannel("gamechat", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id) },{ id: constants.deadRole(game.guild, game.id), deny: ["SEND_MESSAGES"] }]}).then(chan => {
+                    chan.setParent(village.id);
+                    game.userChannelMap.set("GameChat", chan);
+                })
+            } else {
+                game.userChannelMap.set("GameChat", game.guild.channels.find(channel => channel.name === "gamechat" && channel.parentID === village.id));
+            }
+
+            //POLLS
+            if(game.guild.channels.find(channel => channel.name === "abstimmungen" && channel.parentID === village.id) == null) {
+                game.guild.createChannel("abstimmungen", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id) },{ id: constants.deadRole(game.guild, game.id), deny: ["SEND_MESSAGES"] }]}).then(chan => {
+                    chan.setParent(village.id);
+                    game.userChannelMap.set("Abstimmungen", chan);
+                })
+            } else {
+                game.userChannelMap.set("Abstimmungen", game.guild.channels.find(channel => channel.name === "abstimmungen" && channel.parentID === village.id));
+            }
+
+            //DEAD
+            if(game.guild.channels.find(channel => channel.name === "totenchat" && channel.parentID === village.id) == null) {
+                game.guild.createChannel("totenchat", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id) }]}).then(chan => {
+                    chan.setParent(village.id);
+                    game.userChannelMap.set("Totenchat", chan);
+                })
+            } else {
+                game.userChannelMap.set("Totenchat", game.guild.channels.find(channel => channel.name === "totenchat" && channel.parentID === village.id));
+            }
+
+            //VILLAGE
+            if(game.guild.channels.find(channel => channel.name === "Dorf" && channel.parentID === village.id) == null) {
+                game.guild.createChannel("Dorf", {type: "voice", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id) },{ id: constants.deadRole(game.guild, game.id) }]}).then(chan => {
+                    chan.setParent(village.id);
+                    game.userChannelMap.set("Dorf", chan);
+                })
+            } else {
+                game.userChannelMap.set("Dorf", game.guild.channels.find(channel => channel.name === "Dorf" && channel.parentID === village.id));
+            }
+
+            //DEAF
+            if(game.guild.channels.find(channel => channel.name === "Tot" && channel.parentID === village.id) == null) {
+                game.guild.createChannel("Tot", {type: "voice", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id) }]}).then(chan => {
+                    chan.setParent(village.id);
+                    game.userChannelMap.set("Tot", chan);
+                })
+            } else {
+                game.userChannelMap.set("Tot", game.guild.channels.find(channel => channel.name === "Tot" && channel.parentID === village.id));
+            }
+
+        }
     }
 }

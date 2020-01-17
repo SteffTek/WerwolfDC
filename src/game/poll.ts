@@ -26,7 +26,7 @@ export class Poll {
     private _accused: Object;
     private _pollPhase: PollPhase;
 
-    constructor(game: Game, channel: Discord.TextChannel) {
+    constructor(game: Game, channel: Discord.TextChannel, privatePoll: boolean = false) {
         this._game = game;
         this._channel = channel;
         this._votes = {}  //VOTER.DCUSER.ID : ACCUSED.DCUSER.ID
@@ -35,6 +35,7 @@ export class Poll {
         this._voteMessages = {} //VOTER.DCUSER.ID : DISCORD.MESSAGE
         this._resultMessages = {} //ACCUSED.DCUSER.ID : DISCORD.MESSAGE
         this.pollPhase = PollPhase.accuse;
+        this._private = privatePoll;
 
         this._channel.send("```cs\n# - - - Anklage - - -\n```").then((msg: Discord.Message) => {
             this._currentReactionMessage = msg;
@@ -50,24 +51,44 @@ export class Poll {
 
         //SEND IN USERNAMES
         if(this.pollPhase == PollPhase.accuse) {
-            this.pollPhase = PollPhase.voting;
+            this._currentReactionMessage.clearReactions().then( msg => {
+                this._channel.send("```md\n# - - - Voting - - -\n```").then((msg: Discord.Message) => {
+                    this._currentReactionMessage = msg;
+                    this.pollPhase = PollPhase.voting;
+                    msg.react("👌");
 
-            this._currentReactionMessage.clearReactions();
-            this._channel.send("```md\n# - - - Voting - - -\n```").then((msg: Discord.Message) => {
-                this._currentReactionMessage = msg;
-                msg.react("👌");
+                    if(this._private) {
+                        let strAnklage = "\n";
+                        for(let a in this._accused) {
+                            let user = this._game.getUser(this._accused[a]);
+                            strAnklage += user.dcUser.displayName + "\n";
+                        }
+
+                        for(let u in this._game.users){
+                            let user = this._game.users[u];
+                            user.dcUser.send("Anklage erhoben gegen:\n" + strAnklage + "\n\nBitte hier eine Wahl treffen.");
+                        }
+                    }
+                });
             });
         }
 
         if(this.pollPhase == PollPhase.voting) {
-            this.pollPhase = PollPhase.result;
-            this._currentReactionMessage.clearReactions();
-            this._channel.send("```py\n# - - - Ergebnis - - -\n```");
-            this.printResult();
+            this._currentReactionMessage.clearReactions().then( msg => {
+                this.pollPhase = PollPhase.result;
+                this._channel.send("```py\n# - - - Ergebnis - - -\n```");
+                this.printResult();
+            });
         }
 
         if(this.pollPhase == PollPhase.result) {
-            this.pollPhase = PollPhase.accuse;
+            this._currentReactionMessage.clearReactions().then( msg => {
+                this._channel.send("```cs\n# - - - Anklage - - -\n```").then((msg: Discord.Message) => {
+                    this._currentReactionMessage = msg;
+                    this.pollPhase = PollPhase.accuse;
+                    msg.react("👌");
+                });
+            });
         }
     }
 
@@ -137,6 +158,8 @@ export class Poll {
         .setTitle("Enthaltungen:")
         .setDescription(enthaltungen);
 
+        this._channel.send(embedEnthaltung);
+
         this._currentReactionMessage.clearReactions();
         this._channel.send("```fix\n- - - Fertig - - -\n```").then((msg: Discord.Message) => {
             this._currentReactionMessage = msg;
@@ -145,10 +168,6 @@ export class Poll {
     }
 
     handleReaction(dcReaction: Discord.MessageReaction, dcUser: Discord.User){
-        //Ignore when not Result
-        if(this.pollPhase != PollPhase.result){
-            return;
-        }
 
         //Check if Leader
         let leader = this._game.leader;
@@ -163,7 +182,7 @@ export class Poll {
 
         if(user == null) {
             if(emojiString == "👌") {
-                this.pollPhase
+                this.nextPollPhase();
             }
         } else {
             if(emojiString == "💀") {
@@ -204,6 +223,18 @@ export class Poll {
             return;
         }
 
+        if(this._game.getUser(dcMessage.member.id) == null) {
+            return;
+        }
+
+        if(!this._game.getUser(dcMessage.member.id).alive) {
+            return;
+        }
+
+        if(this._private && dcMessage.guild != null) {
+            return;
+        }
+
 
         if(this.pollPhase == PollPhase.accuse) {
             let author = this._game.getUser(dcMessage.member.id);
@@ -214,6 +245,8 @@ export class Poll {
             let author = this._game.getUser(dcMessage.member.id);
             this.vote(dcMessage.content, author);
         }
+
+        dcMessage.delete();
     }
 
     //VOTING
