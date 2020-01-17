@@ -158,19 +158,14 @@ export class DiscordHandler {
                     }
                 }
 
-                console.log(game);
-
                 if(game == null) {
                     return;
                 }
-
-                console.log("text")
 
                 for(let p in game.polls) {
                     let poll = game.polls[p];
 
                     if(poll.channel.id == msg.channel.id) {
-                        console.log("oof");
                         poll.handleMessage(msg);
                         break;
                     //PRIVAT CHAT
