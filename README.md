@@ -53,6 +53,10 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 #### Rolle ändern
 > /role user newRole(chat)
 
+#### Rollen mischen
+##### In Rolechecking die Rollen neu mischen
+> /shuffle
+
 ## Die Spielphasen
 
 ### Phase 1: __created__
