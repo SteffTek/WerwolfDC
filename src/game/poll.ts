@@ -216,7 +216,8 @@ export class Poll {
         let embedEnthaltung = new Discord.RichEmbed()
         .setColor("#0099ff")
         .setTitle("Enthaltungen:")
-        .setDescription(enthaltungen);
+        .addField("Nutzer: ", string, true)
+        .addField("Stimmen:", Object.keys(voters).length, true);
 
         //SEND ENTHALTUNG
         this._channel.send(embedEnthaltung).then( msg => {
