@@ -189,6 +189,10 @@ export class Poll {
                 }
             }
 
+            if(string == "") {
+                continue;
+            }
+
             let embed = new Discord.RichEmbed()
                 .setColor("#0099ff")
                 .setTitle(user.dcUser.displayName)
@@ -213,10 +217,14 @@ export class Poll {
             }
         }
 
+        if(enthaltungen == "") {
+            enthaltungen = "Niemand";
+        }
+
         let embedEnthaltung = new Discord.RichEmbed()
         .setColor("#0099ff")
         .setTitle("Enthaltungen:")
-        .addField("Nutzer: ", string, true)
+        .addField("Nutzer: ", enthaltungen, true)
         .addField("Stimmen:", Object.keys(voters).length, true);
 
         //SEND ENTHALTUNG
