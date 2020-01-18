@@ -20,6 +20,8 @@ export class Poll {
     private _votes: Object;
     private _voteMessages: Object;
     private _resultMessages: Object;
+    private _notVoted: Object;
+    private _notVotedMsg: Discord.Message;
 
     private _currentReactionMessage: Discord.Message;
 
@@ -34,6 +36,7 @@ export class Poll {
         this._userMessages = {} //ACCUSED.DCUSER.ID : DISCORD.MESSAGE
         this._voteMessages = {} //VOTER.DCUSER.ID : DISCORD.MESSAGE
         this._resultMessages = {} //ACCUSED.DCUSER.ID : DISCORD.MESSAGE
+        this._notVoted = {} //ACCUSED.DCUSER.ID : USER
         this.pollPhase = PollPhase.accuse;
         this._private = privatePoll;
 
@@ -47,6 +50,22 @@ export class Poll {
         return this._channel;
     }
 
+    updateVotedList() {
+        if(this._notVotedMsg != null) {
+            let string = "__**Noch nicht gewählt:**__\n\n";
+
+            for(let u in this._notVoted) {
+                let user = this._notVoted[u];
+
+                if(user.alive) {
+                    string += "- **" + user.dcUser.displayName + "**\n"
+                }
+            }
+
+            this._notVotedMsg.edit(string);
+        }
+    }
+
     nextPollPhase() {
 
         //SEND IN USERNAMES
@@ -54,22 +73,38 @@ export class Poll {
             this._currentReactionMessage.clearReactions().then( msg => {
                 this._channel.send("```md\n# - - - Voting - - -\n```").then((msg: Discord.Message) => {
                     this._currentReactionMessage = msg;
-                    this.pollPhase = PollPhase.voting;
                     msg.react("👌");
 
                     if(this._private) {
-                        let strAnklage = "\n";
-                        for(let a in this._accused) {
-                            let user = this._game.getUser(this._accused[a]);
-                            strAnklage += "- " + user.dcUser.displayName + "\n";
-                        }
 
-                        for(let u in this._game.users){
+                        let string = "__**Noch nicht gewählt:**__\n\n";
+
+                        for(let u in this._game.users) {
                             let user = this._game.users[u];
 
-                            if(user.alive)
-                                user.dcUser.send("Anklage erhoben gegen:\n" + strAnklage + "\nBitte hier eine Wahl treffen.");
+                            if(user.alive) {
+                                string += "- **" + user.dcUser.displayName + "**\n"
+                                this._notVoted[user.dcUser.id] = user;
+                            }
                         }
+
+                        this._game.userChannelMap.get("Abstimmungen").send(string).then( message => {
+                            this._notVotedMsg = message;
+
+                            let strAnklage = "\n";
+                            for(let a in this._accused) {
+                                let user = this._game.getUser(this._accused[a]);
+                                strAnklage += "- " + user.dcUser.displayName + "\n";
+                            }
+
+                            for(let u in this._game.users){
+                                let user = this._game.users[u];
+
+                                if(user.alive)
+                                    user.dcUser.send("Anklage erhoben gegen:\n" + strAnklage + "\nBitte hier eine Wahl treffen. \n\n Für eine Enthaltung \"-\" schreiben.");
+                            }
+                            this.pollPhase = PollPhase.voting;
+                        })
                     }
                 });
             });
@@ -78,6 +113,7 @@ export class Poll {
         if(this.pollPhase == PollPhase.voting) {
             this._currentReactionMessage.clearReactions().then( msg => {
                 this.pollPhase = PollPhase.result;
+                this._notVotedMsg.delete();
                 this._channel.send("```py\n# - - - Ergebnis - - -\n```");
                 this.printResult();
             });
@@ -157,7 +193,10 @@ export class Poll {
         let enthaltungen = "";
         for(let voter in voters) {
             let voteUser = this._game.getUser(voters[voter].dcUser.id);
-            enthaltungen = voteUser.dcUser.displayName + "; ";
+
+            if(this._channel.members.get(voteUser.dcUser.id) != null) {
+                enthaltungen += voteUser.dcUser.displayName + "; ";
+            }
         }
 
         let embedEnthaltung = new Discord.RichEmbed()
@@ -269,6 +308,30 @@ export class Poll {
             return;
         }
 
+        //CHECK FOR ENTHALTUNG
+        if(username.startsWith("-")){
+            if(this._private){
+                //CHANGING ACCUSE
+                if(this._votes.hasOwnProperty(voter.dcUser.id)){
+                    this._votes[voter.dcUser.id] = 0;
+                    constants.privateSelfDestructingMessage(voter, "Du hast dich enthalten!", 0);
+                    this._voteMessages[voter.dcUser.id].edit(voter.dcUser.displayName + " hat sich umentschieden.");
+                    return;
+                }
+
+                constants.privateSelfDestructingMessage(voter, "Du hast dich enthalten!", 0);
+                this._channel.send(voter.dcUser.displayName + " hat abgestimmt!").then(msg => {
+                    message = msg;
+                    this._voteMessages[voter.dcUser.id] = message;
+                    delete(this._notVoted[voter.dcUser.id]);
+                    this.updateVotedList();
+
+                    this._votes[voter.dcUser.id] = 0;
+                    return;
+                });
+            }
+        }
+
         //CHECK IF USER EXISTS
         let user = constants.stringToUser(username, this._game);
         if(user == null){
@@ -310,6 +373,8 @@ export class Poll {
             this._channel.send(voter.dcUser.displayName + " hat abgestimmt!").then(msg => {
                 message = msg;
                 this._voteMessages[voter.dcUser.id] = message;
+                delete(this._notVoted[voter.dcUser.id]);
+                this.updateVotedList();
             });
         } else {
             this._channel.send(voter.dcUser.displayName + " hat für **" + user.dcUser.displayName + "** abgestimmt!").then(msg => {

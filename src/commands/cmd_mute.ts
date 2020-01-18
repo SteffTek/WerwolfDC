@@ -36,7 +36,9 @@ export class cmd_mute extends Command {
                 let users = game.users;
                 for (let u in users) {
                     let gameUser = users[u];
-                    gameUser.dcUser.setMute(!gameUser.dcUser.mute);
+
+                    if(gameUser.alive)
+                        gameUser.dcUser.setMute(!gameUser.dcUser.mute);
                 }
             } else {
                 user.setMute(!user.mute);

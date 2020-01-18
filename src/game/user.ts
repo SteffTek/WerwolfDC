@@ -87,13 +87,13 @@ export class User {
         //RESET CHANNEL
         for(var i in specialChats) {
             let chat: Discord.TextChannel = specialChats[i];
-            chat.overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: false});
-
-            if(value != null){
-                if(chat.name == value) {
-                    chat.overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true, READ_MESSAGES: true, READ_MESSAGE_HISTORY: true});
+            chat.overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: false}).then( () => {
+                if(value != null){
+                    if(chat.name == value) {
+                        chat.overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true, READ_MESSAGES: true, READ_MESSAGE_HISTORY: true});
+                    }
                 }
-            }
+            });
         }
 
         this._chat = value;

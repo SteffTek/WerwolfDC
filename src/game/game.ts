@@ -114,26 +114,40 @@ export class Game {
 
         this.userChannelMap.get("Spielleitung").send("```css\n- - - Nutzer - - -\n```").then(msg => {
             //ROLLEN VERTEILEN
-            for (let u in this.users) {
-                let user = this.users[u];
+            this.createMessage.delete();
+            let i = 0;
+            function recursion(game: Game) {
+                let user = game.users[i];
 
                 if (user.isLeader) {
-                    continue;
+                    i++;
+                    if(game.users.length > i) {
+                        recursion(game);
+                    }
+                    return;
                 }
 
                 user.announceRole();
-                this.createMessage.delete();
 
                 //Im Spielleiter Channel Message erstellen
-                this.userChannelMap.get("Spielleitung").send(user.dcUser.displayName + " - " + user.role).then(message => {
+                game.userChannelMap.get("Spielleitung").send(user.dcUser.displayName + " - " + user.role).then(message => {
                     message.react("💀").then(react => {
                         message.react("💚").then(react => {
-                            message.react("👌");
+                            message.react("👌").then( react => {
+                                game.userActions[user.dcUser.id] = message;
+
+                                i++;
+                                if(game.users.length > i) {
+                                    recursion(game);
+                                }
+                                return;
+                            })
                         });
                     });
-                    this.userActions[user.dcUser.id] = message;
                 })
             }
+
+            recursion(this);
         });
 
         return true;
@@ -568,7 +582,7 @@ export class Game {
         function create(game: Game) {
             //SPIELLEITUNG
             if(game.guild.channels.find(channel => channel.name === "spielleitung" && channel.parentID === village.id) == null) {
-                game.guild.createChannel("spielleitung", {type: "text", permissionOverwrites: [{id: game.guild.defaultRole.id, deny: ["VIEW_CHANNEL"] },{ id: constants.leaderRole(game.guild, game.id), allow: ["READ_MESSAGES", "READ_MESSAGE_HISTORY", "SEND_MESSAGES"] },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] }]}).then(chan => {
+                game.guild.createChannel("spielleitung", {type: "text", permissionOverwrites: [{id: game.guild.defaultRole.id, deny: ["VIEW_CHANNEL"] },{ id: constants.leaderRole(game.guild, game.id), allow: ["VIEW_CHANNEL", "READ_MESSAGES", "READ_MESSAGE_HISTORY", "SEND_MESSAGES"] },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] }]}).then(chan => {
                     chan.setParent(village.id);
                     game.userChannelMap.set("Spielleitung", chan);
                 })
