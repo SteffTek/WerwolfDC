@@ -66,7 +66,9 @@ export class Poll {
 
                         for(let u in this._game.users){
                             let user = this._game.users[u];
-                            user.dcUser.send("Anklage erhoben gegen:\n" + strAnklage + "\nBitte hier eine Wahl treffen.");
+
+                            if(user.alive)
+                                user.dcUser.send("Anklage erhoben gegen:\n" + strAnklage + "\nBitte hier eine Wahl treffen.");
                         }
                     }
                 });
@@ -86,6 +88,11 @@ export class Poll {
                 this._channel.send("```cs\n# - - - Anklage - - -\n```").then((msg: Discord.Message) => {
                     this._currentReactionMessage = msg;
                     this.pollPhase = PollPhase.accuse;
+                    this._votes = {}  //VOTER.DCUSER.ID : ACCUSED.DCUSER.ID
+                    this._accused = {} //USER.DCUSER.ID : ACCUSED.DCUSER.ID
+                    this._userMessages = {} //ACCUSED.DCUSER.ID : DISCORD.MESSAGE
+                    this._voteMessages = {} //VOTER.DCUSER.ID : DISCORD.MESSAGE
+                    this._resultMessages = {} //ACCUSED.DCUSER.ID : DISCORD.MESSAGE
                     msg.react("👌");
                 });
             });
@@ -191,6 +198,7 @@ export class Poll {
             if(emojiString == "💀") {
                 //IF DEATH
                 user.alive = false;
+                user.isMayor = false;
             } else if(emojiString =="👌") {
                 //IF MAYOR
                 if(this._game.getMayor() != null) {
@@ -340,6 +348,11 @@ export class Poll {
         let user = constants.stringToUser(username, this._game);
         if(user == null){
             constants.selfDestructingMessage(this._channel, "Nutzer **" + username + "** nicht gefunden!");
+            return;
+        }
+
+        if(!user.alive) {
+            constants.selfDestructingMessage(this._channel, "Nutzer **" + username + "** ist Tod :(!");
             return;
         }
 

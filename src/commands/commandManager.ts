@@ -8,6 +8,7 @@ import {cmd_next} from "./cmd_next";
 import {cmd_close} from "./cmd_close";
 import {cmd_kick} from "./cmd_kick";
 import {cmd_poll} from "./cmd_poll";
+import {cmd_pool} from "./cmd_pool";
 
 export class CommandManager {
 
@@ -18,6 +19,7 @@ export class CommandManager {
         this.add(new cmd_close());
         this.add(new cmd_kick());
         this.add(new cmd_poll());
+        this.add(new cmd_pool());
     }
 
     add(command: Command) {

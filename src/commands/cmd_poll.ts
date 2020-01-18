@@ -42,7 +42,7 @@ export class cmd_poll extends Command {
         if (id != -1) {
 
             let game = guildManager.games[id];
-            if(game.gamePhase == GamePhase.ingame) {
+            if(game.gamePhase != GamePhase.ingame) {
                 dcMessage.channel.send("Das Spiel befindet sich nicht in der Ingame Phase").then((msg) => {
                     tmpMsg = msg;
                     tmpMsg.delete(3000);

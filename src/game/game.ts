@@ -33,6 +33,7 @@ export class Game {
         this.gamePhase = GamePhase.created;
         this.users = [];
         this.polls = [];
+        this.roles = [];
 
         //Create Roles
 
@@ -80,6 +81,7 @@ export class Game {
 
     close() {
         //RESET SPECIAL CHANNEL
+        this.gamePhase = GamePhase.closed;
         this.resetSpecialChannels();
         this.resetChannels();
 
@@ -228,9 +230,9 @@ export class Game {
 
                 //Im Spielleiter Channel Message erstellen
                 this.userChannelMap.get("Spielleitung").send(newUser.dcUser.displayName + " - " + newUser.role).then( message => {
-                    message.react(":skull:");
-                    message.react(":green_heart:");
-                    message.react(":ok_hand:");
+                    message.react("💀");
+                    message.react("💚");
+                    message.react("👌");
                     this.userActions[newUser.dcUser.id] = message;
                 })
             }
@@ -269,7 +271,7 @@ export class Game {
 
     resetSpecialChannels() {
         //RESET SPECIAL CHANNEL
-        let specialChats = this.userChannelMap.get("specialChats");
+        let specialChats = this.userChannelMap.get("specialChats").slice();
         let i = 0;
         function recursion() {
             let chat = specialChats[i];
@@ -280,6 +282,9 @@ export class Game {
                 }
             });
         }
+
+        if(specialChats.length > 0)
+            recursion();
     }
 
     resetChannels() {
@@ -290,36 +295,60 @@ export class Game {
         });
     }
 
-    set setRoles(array: Array<string>) {
+    setRoles(array: Array<string>) {
+        // /pool 3 werwolf(wwchat)
         //array = [werwolf(wwchat), werwolf(wwchat), dorfbewohner]
         this.roles = array;
 
         this.resetSpecialChannels();
 
         //CREATE SPECIAL CHANNEL
-        this.userChannelMap.get("specialChats").clear();
-        for(const r in array) {
-            let role = array[r];
+        this.userChannelMap.set("specialChats", new Array);
+        let i = 0;
+        function recursion(game: Game) {
+            let role = array[i];
+            console.log(role);
             let chat = role.replace("(", " ").replace(")", "").split(" ")[1];
 
+            if(chat == null) {
+                i++;
+                if(array.length > i){
+                    recursion(game);
+                    return;
+                }
+            }
+
             let exists = false;
-            for(const c in this.userChannelMap.get("specialChats")) {
-                let channel = this.userChannelMap.get("specialChats")[c];
+            for(const c in game.userChannelMap.get("specialChats")) {
+                let channel = game.userChannelMap.get("specialChats")[c];
                 if(channel.name == chat) {
                     exists = true;
                 }
             }
 
             if(exists) {
-                continue;
+                i++;
+                if(array.length > i){
+                    recursion(game);
+                    return;
+                }
             }
 
             //Special Channel
-            this.guild.createChannel(chat, {type: "text", permissionOverwrites: [{ id: constants.leaderRole(this.guild, this.id) }]}).then((chan: Discord.TextChannel) => {
-                chan.setParent(this.userChannelMap.get("Category").id);
-                this.userChannelMap.get("specialChats").push(chan);
+            game.guild.createChannel(chat, {type: "text", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) }, { id: game.guild.defaultRole.id, deny: ["VIEW_CHANNEL"]}]}).then((chan: Discord.TextChannel) => {
+                chan.setParent(game.userChannelMap.get("Category").id);
+                game.userChannelMap.get("specialChats").push(chan);
+
+                i++;
+                if(array.length > i){
+                    recursion(game);
+                    return;
+                }
             })
         }
+
+        if(array.length > 0)
+            recursion(this);
     }
 
     getUser(id: string) {
@@ -401,7 +430,6 @@ export class Game {
         var instantiated = 0;
 
         //Create Roles
-        if(instantiated == 0)
         if(constants.leaderRole(this.guild, this.id) == null) {
             this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE", hoist: true}).then(role => {
                 instantiated++;
@@ -454,6 +482,7 @@ export class Game {
                 create(this);
             });
         } else {
+            this.userChannelMap.set("Category", village);
             create(this);
         }
 
