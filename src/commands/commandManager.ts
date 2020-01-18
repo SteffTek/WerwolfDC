@@ -14,6 +14,8 @@ import {cmd_leader} from "./cmd_leader";
 import {cmd_list} from "./cmd_list";
 import {cmd_add} from "./cmd_add";
 import {cmd_mute} from "./cmd_mute";
+import {cmd_role} from "./cmd_role";
+import { cmd_shuffle } from "./cmd_shuffle";
 
 export class CommandManager {
 
@@ -31,6 +33,8 @@ export class CommandManager {
         this.add(new cmd_leader());
         this.add(new cmd_add());
         this.add(new cmd_mute());
+        this.add(new cmd_role());
+        this.add(new cmd_shuffle());
     }
 
     add(command: Command) {

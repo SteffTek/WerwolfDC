@@ -31,7 +31,7 @@ export class cmd_mute extends Command {
         dcMessage.delete();
 
         if (id != -1) {
-            if(user != null){
+            if(user == null){
                 let game: Game = guildManager.games[id];
                 let users = game.users;
                 for (let u in users) {
