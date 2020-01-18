@@ -439,7 +439,7 @@ export class Game {
         }
 
         if(constants.mayorRole(this.guild, this.id) == null) {
-            this.guild.createRole({name:"Bürgermeister #" + this.id, color: "GOLD", hoist: true}).then(role => {
+            this.guild.createRole({name:"Bürgermeister #" + this.id, color: "GOLD", hoist: false}).then(role => {
                 instantiated++;
             });
         } else {
@@ -489,7 +489,7 @@ export class Game {
         function create(game: Game) {
             //SPIELLEITUNG
             if(game.guild.channels.find(channel => channel.name === "spielleitung" && channel.parentID === village.id) == null) {
-                game.guild.createChannel("spielleitung", {type: "text", permissionOverwrites: [{id: game.guild.defaultRole.id, deny: ["VIEW_CHANNEL"] },{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] }]}).then(chan => {
+                game.guild.createChannel("spielleitung", {type: "text", permissionOverwrites: [{id: game.guild.defaultRole.id, deny: ["VIEW_CHANNEL"] },{ id: constants.leaderRole(game.guild, game.id), allow: ["READ_MESSAGES", "READ_MESSAGE_HISTORY", "SEND_MESSAGES"] },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] }]}).then(chan => {
                     chan.setParent(village.id);
                     game.userChannelMap.set("Spielleitung", chan);
                 })
@@ -499,7 +499,7 @@ export class Game {
 
             //GAMECHAT
             if(game.guild.channels.find(channel => channel.name === "gamechat" && channel.parentID === village.id) == null) {
-                game.guild.createChannel("gamechat", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id) },{ id: constants.deadRole(game.guild, game.id), deny: ["SEND_MESSAGES"] }]}).then(chan => {
+                game.guild.createChannel("gamechat", {type: "text", permissionOverwrites: [{id: game.guild.defaultRole.id, deny: ["SEND_MESSAGES"], allow: ["READ_MESSAGES", "READ_MESSAGE_HISTORY"]},{ id: constants.leaderRole(game.guild, game.id), allow: ["SEND_MESSAGES"] },{ id: constants.aliveRole(game.guild, game.id), allow: ["SEND_MESSAGES"] },{ id: constants.deadRole(game.guild, game.id), deny: ["SEND_MESSAGES"] }]}).then(chan => {
                     chan.setParent(village.id);
                     game.userChannelMap.set("GameChat", chan);
                 })
@@ -509,7 +509,7 @@ export class Game {
 
             //POLLS
             if(game.guild.channels.find(channel => channel.name === "abstimmungen" && channel.parentID === village.id) == null) {
-                game.guild.createChannel("abstimmungen", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id) },{ id: constants.deadRole(game.guild, game.id), deny: ["SEND_MESSAGES"] }]}).then(chan => {
+                game.guild.createChannel("abstimmungen", {type: "text", permissionOverwrites: [{id: game.guild.defaultRole.id, deny: ["SEND_MESSAGES"], allow: ["READ_MESSAGES", "READ_MESSAGE_HISTORY"]},{ id: constants.leaderRole(game.guild, game.id), allow: ["SEND_MESSAGES"] },{ id: constants.aliveRole(game.guild, game.id), allow: ["SEND_MESSAGES"] },{ id: constants.deadRole(game.guild, game.id), deny: ["SEND_MESSAGES"] }]}).then(chan => {
                     chan.setParent(village.id);
                     game.userChannelMap.set("Abstimmungen", chan);
                 })
@@ -519,7 +519,7 @@ export class Game {
 
             //DEAD
             if(game.guild.channels.find(channel => channel.name === "totenchat" && channel.parentID === village.id) == null) {
-                game.guild.createChannel("totenchat", {type: "text", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id) }]}).then(chan => {
+                game.guild.createChannel("totenchat", {type: "text", permissionOverwrites: [{id: game.guild.defaultRole.id, allow: ["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "READ_MESSAGES"]},{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id) }]}).then(chan => {
                     chan.setParent(village.id);
                     game.userChannelMap.set("Totenchat", chan);
                 })
