@@ -30,8 +30,8 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 
 #### Nutzer hinzufügen
 ##### (Role nur während Phase <ingame> benötigt)
-Da User@Mention benötigt, kann nur in öffentlichen Spiel-Kanälen genutzt werden.
-> /add user@mention [role]
+##### Nur während Ingame und Created nutzbar
+> /add user [role]
 
 #### Nutzer entfernen
 > /kick user
@@ -44,8 +44,7 @@ Da User@Mention benötigt, kann nur in öffentlichen Spiel-Kanälen genutzt werd
 > /list
 
 #### Spielleitung übergeben
-Da User@Mention benötigt, kann nur in öffentlichen Spiel-Kanälen genutzt werden.
-> /leader user@mention
+> /leader user
 
 #### Abstimmung erstellen
 ##### (Public = User Votes werden direkt angezeigt)
@@ -72,7 +71,8 @@ Da User@Mention benötigt, kann nur in öffentlichen Spiel-Kanälen genutzt werd
 #### Phasen-Regeln:
 - dem Spiel kann NICHT mehr beigetreten werden
 - Pool kann erstellt werden
-- Nutzer können Hinzugefügt/Gekickt werden
+- Nutzer können NICHT Hinzugefügt werden (Zurück zu Created mit /back)
+- Nutzer können gekickt werden
 - Rollen können geshuffeld werden
 - Es kann zurück in die Phase created gewechselt werden
 
