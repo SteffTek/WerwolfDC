@@ -1,11 +1,8 @@
 import {logger} from "../utils/logger";
 import {GuildGameManager} from "../server/guild";
-import conf = require("../utils/config");
-import Discord = require("discord.js");
-import {Game} from "../game/game";
+import {Game, GamePhase} from "../game/game";
 import {MainIndex} from "../../index";
-import {stringutils} from "../utils/stringutils";
-import {type} from "os";
+import conf = require("../utils/config");
 
 export class DiscordHandler {
 
@@ -119,6 +116,10 @@ export class DiscordHandler {
                 }
 
                 if(game == null) {
+                    return;
+                }
+
+                if(game.gamePhase != GamePhase.created){
                     return;
                 }
 

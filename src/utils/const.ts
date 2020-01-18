@@ -20,6 +20,10 @@ export module constants {
 
     export function stringToUser(string: string, game: Game){
 
+        if(string == null){
+            return null;
+        }
+
         let users = [];
 
         for(let u in game.users) {
@@ -33,13 +37,39 @@ export module constants {
         for(let u in game.users) {
             let user = game.users[u];
             if(user.dcUser.displayName == matches.bestMatch.target) {
-                if(matches.bestMatch.rating > 0.1){
+                if(matches.bestMatch.rating >= 0.1){
                     return user;
                 }
             }
         }
 
         return null;
+    }
+
+    export function stringToGuildMember(string: string, guild: Discord.Guild) {
+
+        if(string == null){
+            return null;
+        }
+
+        let users = [];
+        guild.members.forEach(member => {
+            users.push(member.displayName);
+        });
+
+        let matches = stringSimilarity.findBestMatch(string, users);
+
+        let dcMember = null;
+
+        guild.members.forEach(member => {
+            if(member.displayName == matches.bestMatch.target) {
+                if(matches.bestMatch.rating >= 0.1) {
+                    dcMember = member;
+                }
+            }
+        });
+
+        return dcMember;
     }
 
     export function selfDestructingMessage(channel: Discord.TextChannel, string: string, time: number = 3000) {
