@@ -68,6 +68,7 @@ export class User {
         } else {
             this._dcUser.addRole(constants.deadRole(this._game.guild, this._game.id));
             this._dcUser.removeRole(constants.aliveRole(this._game.guild, this._game.id));
+            this._dcUser.removeRole(constants.mayorRole(this._game.guild, this._game.id));
         }
     }
 
@@ -85,12 +86,12 @@ export class User {
 
         //RESET CHANNEL
         for(var i in specialChats) {
-            let chat = specialChats[i];
-            this._game.guild.channels.get(chat.name).overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: false});
+            let chat: Discord.TextChannel = specialChats[i];
+            chat.overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: false});
 
             if(value != null){
                 if(chat.name == value) {
-                    this._game.guild.channels.get(chat.name).overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true, READ_MESSAGES: true, READ_MESSAGE_HISTORY: true});
+                    chat.overwritePermissions(this._dcUser.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true, READ_MESSAGES: true, READ_MESSAGE_HISTORY: true});
                 }
             }
         }
@@ -105,7 +106,7 @@ export class User {
     announceRole() {
         let chat = this._role.replace("(", " ").replace(")", "").split(" ");
         this.chat = chat[1];
-        this._dcUser.sendMessage(chat[0]);
+        this._dcUser.send(chat[0]);
     }
 
     reset(){

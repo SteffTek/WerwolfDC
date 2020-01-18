@@ -9,6 +9,11 @@ import {cmd_close} from "./cmd_close";
 import {cmd_kick} from "./cmd_kick";
 import {cmd_poll} from "./cmd_poll";
 import {cmd_pool} from "./cmd_pool";
+import {cmd_back} from "./cmd_back";
+import {cmd_leader} from "./cmd_leader";
+import {cmd_list} from "./cmd_list";
+import {cmd_add} from "./cmd_add";
+import {cmd_mute} from "./cmd_mute";
 
 export class CommandManager {
 
@@ -20,6 +25,12 @@ export class CommandManager {
         this.add(new cmd_kick());
         this.add(new cmd_poll());
         this.add(new cmd_pool());
+        this.add(new cmd_next());
+        this.add(new cmd_back());
+        this.add(new cmd_list());
+        this.add(new cmd_leader());
+        this.add(new cmd_add());
+        this.add(new cmd_mute());
     }
 
     add(command: Command) {

@@ -25,7 +25,7 @@ export class Game {
     userActions: Object;
     polls: Array<Poll>
 
-    constructor(id: number, guild: Discord.Guild, emoji: string, dcLeader: Discord.GuildMember, createMessage: Discord.Message){
+    constructor(id: number, guild: Discord.Guild, emoji: string, dcLeader: Discord.GuildMember, createMessage: Discord.Message) {
         this.guild = guild;
         this.emoji = emoji;
         this.id = id;
@@ -34,10 +34,11 @@ export class Game {
         this.users = [];
         this.polls = [];
         this.roles = [];
+        this.userActions = {};
 
         //Create Roles
 
-        this.createRoles(this, function(game: Game){
+        this.createRoles(this, function (game: Game) {
             game.leader = new User(dcLeader, game, true);
             game.create();
         })
@@ -55,28 +56,87 @@ export class Game {
         this.createChannel();
     }
 
-    start() {
-        this.gamePhase = GamePhase.ingame;
+    nextGamePhase() {
 
-        //ROLLEN VERTEILEN
-        for(let u in this.users) {
-            let user = this.users[u];
+        if(this.users.length < 2) {
+            //return false;
+            //FIXME HIER IST WICHTIG, NE?
+        }
 
-            if(user.isLeader) {
-                continue;
+        if (this.gamePhase == GamePhase.created) {
+            return this.checkRoles();
+        }
+
+        if (this.gamePhase == GamePhase.rolechecking) {
+            return this.start();
+        }
+
+        if (this.gamePhase == GamePhase.ingame) {
+            this.close();
+            return true;
+        }
+
+    }
+
+    prevGamePhase() {
+        if (this.gamePhase == GamePhase.rolechecking) {
+            this.gamePhase = GamePhase.created;
+            return true;
+        }
+
+        return false;
+    }
+
+    checkRoles() {
+        if (this.shuffleRoles()) {
+            this.gamePhase = GamePhase.rolechecking;
+
+            let string = "__**Die Rollenverteilung:**__ \n\n";
+            let userList = this.listUsers(true);
+            for (let i = 0; i < userList.length; i++) {
+                string += userList[i] + "\n"
             }
 
-            user.announceRole();
-            this.createMessage.delete();
+            this.userChannelMap.get("Spielleitung").send(string);
 
-            //Im Spielleiter Channel Message erstellen
-            this.userChannelMap.get("Spielleitung").send(user.dcUser.displayName + " - " + user.role).then( message => {
-                message.react("💀");
-                message.react("💚");
-                message.react("👌");
-                this.userActions[user.dcUser.id] = message;
-            })
+            return true;
+        } else {
+            return false;
         }
+    }
+
+    start() {
+        if (this.gamePhase != GamePhase.rolechecking) {
+            return false;
+        }
+
+        this.gamePhase = GamePhase.ingame;
+
+        this.userChannelMap.get("Spielleitung").send("```css\n- - - Nutzer - - -\n```").then(msg => {
+            //ROLLEN VERTEILEN
+            for (let u in this.users) {
+                let user = this.users[u];
+
+                if (user.isLeader) {
+                    continue;
+                }
+
+                user.announceRole();
+                this.createMessage.delete();
+
+                //Im Spielleiter Channel Message erstellen
+                this.userChannelMap.get("Spielleitung").send(user.dcUser.displayName + " - " + user.role).then(message => {
+                    message.react("💀").then(react => {
+                        message.react("💚").then(react => {
+                            message.react("👌");
+                        });
+                    });
+                    this.userActions[user.dcUser.id] = message;
+                })
+            }
+        });
+
+        return true;
     }
 
     close() {
@@ -86,11 +146,16 @@ export class Game {
         this.resetChannels();
 
         //RESET USERS
-        for(let u in this.users){
+        for (let u in this.users) {
             let user = this.users[u];
             user.reset();
         }
         this.users = [];
+
+        for (let us in this.userActions) {
+            let rec: Discord.Message = this.userActions[us];
+            rec.clearReactions();
+        }
 
         this.leader.reset();
 
@@ -109,7 +174,7 @@ export class Game {
         var privatePoll = false;
         var channel: Discord.TextChannel;
         var specialChats = this.userChannelMap.get("specialChats");
-        for(let c in specialChats) {
+        for (let c in specialChats) {
             let chat = specialChats[c];
 
             if(chat.id == dcChannel.id) {
@@ -123,7 +188,7 @@ export class Game {
             privatePoll = true;
         }
 
-        if(channel == null) {
+        if (channel == null) {
             return false;
         }
 
@@ -132,15 +197,15 @@ export class Game {
 
     }
 
-    handleReaction(dcReaction: Discord.MessageReaction, dcUser: Discord.User){
+    handleReaction(dcReaction: Discord.MessageReaction, dcUser: Discord.User) {
         //Ignore when not Result
-        if(this.gamePhase != GamePhase.ingame){
+        if (this.gamePhase != GamePhase.ingame) {
             return;
         }
 
         //Check if Leader
         let leader = this.leader;
-        if(leader.dcUser.id != dcUser.id){
+        if (leader.dcUser.id != dcUser.id) {
             return;
         }
 
@@ -149,20 +214,22 @@ export class Game {
         let id = this.getReactedUser(dcReaction.message);
         let user = this.getUser(id);
 
-        if(user == null) {
+        if (user == null) {
             return;
         }
 
-        if(emojiString == "💀") {
+        dcReaction.remove(leader.dcUser.id);
+
+        if (emojiString == "💀") {
             //IF DEATH
             user.alive = false;
-        } else if(emojiString =="👌") {
+        } else if (emojiString == "👌") {
             //IF MAYOR
-            if(this.getMayor != null) {
+            if (this.getMayor() != null) {
                 this.getMayor().isMayor = false;
             }
             user.isMayor = true;
-        } else if(emojiString =="💚") {
+        } else if (emojiString == "💚") {
             //IF ALIVE
             user.alive = true;
         }
@@ -170,9 +237,9 @@ export class Game {
     }
 
     getReactedUser(dcMessage: Discord.Message) {
-        for(let userID in this.userActions) {
+        for (let userID in this.userActions) {
             let msg = this.userActions[userID];
-            if(msg.id == dcMessage.id) {
+            if (msg.id == dcMessage.id) {
                 return userID;
             }
         }
@@ -181,24 +248,24 @@ export class Game {
 
     listUsers(showRole: boolean): Array<string> {
         let users = [];
-        for(var u in this.users){
+        for (let u in this.users) {
             let user = this.users[u];
-            users.push(user.dcUser.displayName + (showRole) ? " - " +user.role : "");
+            users.push(user.dcUser.displayName + (showRole ? " - " + user.role : ""));
         }
         return users;
     }
 
     kickUser(dcUser: Discord.GuildMember) {
-        for(let u in this.users) {
+        for (let u in this.users) {
             var user = this.users[u];
 
-            if(user.dcUser == dcUser) {
+            if (user.dcUser == dcUser) {
 
                 //Delete Message in Spielleiter
-                for(let userID in this.userActions) {
-                    if(user.dcUser.id == userID) {
+                for (let userID in this.userActions) {
+                    if (user.dcUser.id == userID) {
                         this.userActions[userID].delete();
-                        delete(this.userActions[userID]);
+                        delete (this.userActions[userID]);
                         break;
                     }
                 }
@@ -211,25 +278,29 @@ export class Game {
     }
 
     addUser(dcUser: Discord.GuildMember, role: string = null): boolean {
-        for(var u in this.users) {
+        for (var u in this.users) {
             var user = this.users[u];
 
-            if(user.dcUser == dcUser) {
+            if (user.dcUser == dcUser) {
                 return false; //ALREADY ADDED
             }
         }
 
+        if (this.gamePhase == GamePhase.rolechecking || this.gamePhase == GamePhase.closed) {
+            return false;
+        }
+
         let newUser = new User(dcUser, this, false)
 
-        if(role != null) {
-            if(this.gamePhase == GamePhase.ingame){
+        if (role != null) {
+            if (this.gamePhase == GamePhase.ingame) {
                 newUser.alive = true;
                 newUser.role = role;
 
                 newUser.announceRole();
 
                 //Im Spielleiter Channel Message erstellen
-                this.userChannelMap.get("Spielleitung").send(newUser.dcUser.displayName + " - " + newUser.role).then( message => {
+                this.userChannelMap.get("Spielleitung").send(newUser.dcUser.displayName + " - " + newUser.role).then(message => {
                     message.react("💀");
                     message.react("💚");
                     message.react("👌");
@@ -237,7 +308,7 @@ export class Game {
                 })
             }
         } else {
-            if(this.gamePhase == GamePhase.ingame){
+            if (this.gamePhase == GamePhase.ingame) {
                 return false; //Bei Ingame muss eine Rolle angegeben werden
             }
         }
@@ -252,13 +323,13 @@ export class Game {
 
     shuffleRoles() {
 
-        if(this.roles.length != this.users.length) {
+        if (this.roles.length != this.users.length) {
             return false;
         }
 
         let roles = this.roles.slice();
 
-        for(let u in this.users){
+        for (let u in this.users) {
             let user = this.users[u];
             let random = Math.floor(Math.random() * roles.length);
 
@@ -273,23 +344,24 @@ export class Game {
         //RESET SPECIAL CHANNEL
         let specialChats = this.userChannelMap.get("specialChats").slice();
         let i = 0;
+
         function recursion() {
             let chat = specialChats[i];
             specialChats[i].delete().then(() => {
                 i++;
-                if(i < specialChats.length) {
+                if (i < specialChats.length) {
                     recursion();
                 }
             });
         }
 
-        if(specialChats.length > 0)
+        if (specialChats.length > 0)
             recursion();
     }
 
     resetChannels() {
         this.userChannelMap.forEach((value: Discord.Channel, key: string) => {
-            if(key != "specialChats") {
+            if (key != "specialChats") {
                 //value.delete();
             }
         });
@@ -305,57 +377,64 @@ export class Game {
         //CREATE SPECIAL CHANNEL
         this.userChannelMap.set("specialChats", new Array);
         let i = 0;
+
         function recursion(game: Game) {
             let role = array[i];
             console.log(role);
             let chat = role.replace("(", " ").replace(")", "").split(" ")[1];
 
-            if(chat == null) {
+            if (chat == null) {
                 i++;
-                if(array.length > i){
+                if (array.length > i) {
                     recursion(game);
-                    return;
                 }
+                return;
             }
 
             let exists = false;
-            for(const c in game.userChannelMap.get("specialChats")) {
+            for (const c in game.userChannelMap.get("specialChats")) {
                 let channel = game.userChannelMap.get("specialChats")[c];
-                if(channel.name == chat) {
+                if (channel.name == chat) {
                     exists = true;
                 }
             }
 
-            if(exists) {
+            if (exists) {
                 i++;
-                if(array.length > i){
+                if (array.length > i) {
                     recursion(game);
-                    return;
                 }
+                return;
             }
 
             //Special Channel
-            game.guild.createChannel(chat, {type: "text", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) }, { id: game.guild.defaultRole.id, deny: ["VIEW_CHANNEL"]}]}).then((chan: Discord.TextChannel) => {
+            game.guild.createChannel(chat, {
+                type: "text",
+                permissionOverwrites: [{id: constants.leaderRole(game.guild, game.id)}, {
+                    id: game.guild.defaultRole.id,
+                    deny: ["VIEW_CHANNEL"]
+                }]
+            }).then((chan: Discord.TextChannel) => {
                 chan.setParent(game.userChannelMap.get("Category").id);
                 game.userChannelMap.get("specialChats").push(chan);
 
                 i++;
-                if(array.length > i){
+                if (array.length > i) {
                     recursion(game);
-                    return;
                 }
+                return;
             })
         }
 
-        if(array.length > 0)
+        if (array.length > 0)
             recursion(this);
     }
 
     getUser(id: string) {
-        for(let u in this.users){
+        for (let u in this.users) {
             let user = this.users[u];
 
-            if(user.dcUser.id == id){
+            if (user.dcUser.id == id) {
                 return user;
             }
         }
@@ -363,10 +442,10 @@ export class Game {
     }
 
     getMayor(): User {
-        for(let u in this.users){
+        for (let u in this.users) {
             let user = this.users[u];
 
-            if(user.isMayor){
+            if (user.isMayor) {
                 return user;
             }
         }
@@ -376,8 +455,8 @@ export class Game {
     getAlive(): Object {
         let array = {};
 
-        for(let u in this.users){
-            if(this.users[u].alive) {
+        for (let u in this.users) {
+            if (this.users[u].alive) {
                 array[this.users[u].dcUser.id] = this.users[u];
             }
         }
@@ -388,18 +467,18 @@ export class Game {
     checkIfReactionFromGame(dcReaction: Discord.MessageReaction) {
         let channelID = dcReaction.message.channel.id;
 
-        if(this.userChannelMap.get("Spielleitung").id == channelID) {
+        if (this.userChannelMap.get("Spielleitung").id == channelID) {
             return "game";
         }
 
-        if(this.userChannelMap.get("Abstimmungen").id == channelID) {
+        if (this.userChannelMap.get("Abstimmungen").id == channelID) {
             return "poll";
         }
 
-        for(let p in this.polls) {
+        for (let p in this.polls) {
             let poll = this.polls[p];
 
-            if(poll.channel.id == channelID){
+            if (poll.channel.id == channelID) {
                 return "poll";
             }
         }
@@ -410,14 +489,14 @@ export class Game {
     checkIfMessageFromGame(dcMessage: Discord.Message) {
         let channelID = dcMessage.channel.id;
 
-        if(this.userChannelMap.get("Abstimmungen").id == channelID) {
+        if (this.userChannelMap.get("Abstimmungen").id == channelID) {
             return "poll";
         }
 
-        for(let p in this.polls) {
+        for (let p in this.polls) {
             let poll = this.polls[p];
 
-            if(poll.channel.id == channelID){
+            if (poll.channel.id == channelID) {
                 return "poll";
             }
         }
@@ -430,8 +509,8 @@ export class Game {
         var instantiated = 0;
 
         //Create Roles
-        if(constants.leaderRole(this.guild, this.id) == null) {
-            this.guild.createRole({name:"Spielleiter #" + this.id, color: "ORANGE", hoist: true}).then(role => {
+        if (constants.leaderRole(this.guild, this.id) == null) {
+            this.guild.createRole({name: "Spielleiter #" + this.id, color: "ORANGE", hoist: true}).then(role => {
                 instantiated++;
             });
         } else {
@@ -446,16 +525,16 @@ export class Game {
             instantiated++;
         }
 
-        if(constants.aliveRole(this.guild, this.id) == null) {
-            this.guild.createRole({name:"Lebendig #" + this.id, color: "GREEN", hoist: true}).then(role => {
+        if (constants.aliveRole(this.guild, this.id) == null) {
+            this.guild.createRole({name: "Lebendig #" + this.id, color: "GREEN", hoist: true}).then(role => {
                 instantiated++;
             });
         } else {
             instantiated++;
         }
 
-        if(constants.deadRole(this.guild, this.id) == null) {
-            this.guild.createRole({name:"Tod #" + this.id, color: "RED", hoist: true}).then(role => {
+        if (constants.deadRole(this.guild, this.id) == null) {
+            this.guild.createRole({name: "Tod #" + this.id, color: "RED", hoist: true}).then(role => {
                 instantiated++;
             });
         } else {
@@ -474,9 +553,9 @@ export class Game {
         let children = [];
 
         //IF VILLAGE DOESNT EXIST
-        if(village == null) {
+        if (village == null) {
             //CREATE
-            this.guild.createChannel("Dorf #" + this.id, {type: "category"}).then( vill => {
+            this.guild.createChannel("Dorf #" + this.id, {type: "category"}).then(vill => {
                 this.userChannelMap.set("Category", vill);
                 village = vill
                 create(this);
@@ -528,8 +607,11 @@ export class Game {
             }
 
             //VILLAGE
-            if(game.guild.channels.find(channel => channel.name === "Dorf" && channel.parentID === village.id) == null) {
-                game.guild.createChannel("Dorf", {type: "voice", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id) },{ id: constants.deadRole(game.guild, game.id) }]}).then(chan => {
+            if (game.guild.channels.find(channel => channel.name === "Dorf" && channel.parentID === village.id) == null) {
+                game.guild.createChannel("Dorf", {
+                    type: "voice",
+                    permissionOverwrites: [{id: constants.leaderRole(game.guild, game.id)}, {id: constants.aliveRole(game.guild, game.id)}, {id: constants.deadRole(game.guild, game.id)}]
+                }).then(chan => {
                     chan.setParent(village.id);
                     game.userChannelMap.set("Dorf", chan);
                 })
@@ -538,8 +620,14 @@ export class Game {
             }
 
             //DEAF
-            if(game.guild.channels.find(channel => channel.name === "Tot" && channel.parentID === village.id) == null) {
-                game.guild.createChannel("Tot", {type: "voice", permissionOverwrites: [{ id: constants.leaderRole(game.guild, game.id) },{ id: constants.aliveRole(game.guild, game.id), deny: ["VIEW_CHANNEL"] },{ id: constants.deadRole(game.guild, game.id) }]}).then(chan => {
+            if (game.guild.channels.find(channel => channel.name === "Tot" && channel.parentID === village.id) == null) {
+                game.guild.createChannel("Tot", {
+                    type: "voice",
+                    permissionOverwrites: [{id: constants.leaderRole(game.guild, game.id)}, {
+                        id: constants.aliveRole(game.guild, game.id),
+                        deny: ["VIEW_CHANNEL"]
+                    }, {id: constants.deadRole(game.guild, game.id)}]
+                }).then(chan => {
                     chan.setParent(village.id);
                     game.userChannelMap.set("Tot", chan);
                 })
