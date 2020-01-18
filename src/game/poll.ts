@@ -103,9 +103,9 @@ export class Poll {
                                 if(user.alive)
                                     user.dcUser.send("Anklage erhoben gegen:\n" + strAnklage + "\nBitte hier eine Wahl treffen. \n\n Für eine Enthaltung \"-\" schreiben.");
                             }
-                            this.pollPhase = PollPhase.voting;
                         })
                     }
+                    this.pollPhase = PollPhase.voting;
                 });
             });
         }
@@ -113,7 +113,11 @@ export class Poll {
         if(this.pollPhase == PollPhase.voting) {
             this._currentReactionMessage.clearReactions().then( msg => {
                 this.pollPhase = PollPhase.result;
-                this._notVotedMsg.delete();
+
+                if(this._private){
+                    this._notVotedMsg.delete();
+                }
+
                 this._channel.send("```py\n# - - - Ergebnis - - -\n```");
                 this.printResult();
             });
@@ -153,6 +157,11 @@ export class Poll {
 
             if(this._votes.hasOwnProperty(voter.dcUser.id)){
 
+                if(this._votes[voter.dcUser.id] == 0) {
+                    // Vote = 0 aka Enthalten
+                    continue;
+                }
+
                 if(!votes.hasOwnProperty(this._votes[voter.dcUser.id])){
                     votes[this._votes[voter.dcUser.id]] = 0;
                 }
@@ -165,6 +174,11 @@ export class Poll {
         for(let vote in votes) {
             //CREATE EMBED MESSAGE
             let user = this._game.getUser(vote);
+
+            if(user == null) {
+                // Vote = 0 aka Enthalten
+                continue;
+            }
 
             var string = "";
             for(let userVote in this._votes) {
@@ -182,9 +196,9 @@ export class Poll {
                 .addField("Stimmen:", votes[vote], true);
 
             this._channel.send(embed).then((msg: Discord.Message) => {
-                msg.react("💀");
-                msg.react("👌");
-
+                msg.react("💀").then( react => {
+                    msg.react("👌");
+                });
                 this._resultMessages[user.dcUser.id] = msg;
             });
         }
