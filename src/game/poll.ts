@@ -423,6 +423,11 @@ export class Poll {
         if(username.startsWith("-")){
             if(this._accused.hasOwnProperty(accuser.dcUser.id)){
                 let user = this._game.getUser(this._accused[accuser.dcUser.id]);
+
+                if(user == null) {
+                    return;
+                }
+
                 this._userMessages[user.dcUser.id].delete();
                 delete(this._accused[accuser.dcUser.id]);
                 delete(this._userMessages[user.dcUser.id]);
@@ -451,11 +456,13 @@ export class Poll {
 
         //CHANGING ACCUSE
         if(this._accused.hasOwnProperty(accuser.dcUser.id)){
-            this._userMessages[this._accused[accuser.dcUser.id]].edit(accuser.dcUser.displayName + " hat stattdessen **" + user.dcUser.displayName + "** angeklagt!");
-            this._userMessages[user.dcUser.id] = this._userMessages[this._accused[accuser.dcUser.id]];
-            delete(this._userMessages[this._accused[accuser.dcUser.id]]);
-            this._accused[accuser.dcUser.id] = user.dcUser.id;
-            return;
+            if(this._userMessages[this._accused[accuser.dcUser.id]] != null) {
+                this._userMessages[this._accused[accuser.dcUser.id]].edit(accuser.dcUser.displayName + " hat stattdessen **" + user.dcUser.displayName + "** angeklagt!");
+                this._userMessages[user.dcUser.id] = this._userMessages[this._accused[accuser.dcUser.id]];
+                delete(this._userMessages[this._accused[accuser.dcUser.id]]);
+                this._accused[accuser.dcUser.id] = user.dcUser.id;
+                return;
+            }
         }
 
         //ADDING ACCUSE
