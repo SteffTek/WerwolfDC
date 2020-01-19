@@ -304,6 +304,10 @@ export class Poll {
             return;
         }
 
+        if(dcMessage.content.startsWith(conf.getConfig().prefix)) {
+            return;
+        }
+
         if(this.pollPhase == PollPhase.voting){
             if(this._private && dcMessage.guild != null) {
                 return;
