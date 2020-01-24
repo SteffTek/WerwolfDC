@@ -3,6 +3,8 @@ Ein Discord-Bot für das beliebte Spiel Werwolf.
 
 Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über mehrere Discord-Server Hinweg.
 
+[Discord](https://discordapp.com/oauth2/authorize?&client_id=666656065793818634&scope=bot&permissions=272706672)
+
 ## Commands
 
 #### Hilfe Anzeigen
