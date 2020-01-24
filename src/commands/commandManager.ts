@@ -1,8 +1,9 @@
 import Discord = require("discord.js");
 import {Command} from "./command";
 import {logger} from "../utils/logger";
-import "./cmd_creategame"
 import conf = require("../utils/config");
+
+import {cmd_help} from "./cmd_help";
 import {cmd_creategame} from "./cmd_creategame";
 import {cmd_next} from "./cmd_next";
 import {cmd_close} from "./cmd_close";
@@ -22,6 +23,7 @@ export class CommandManager {
     commands: Array<Command> = new Array<Command>();
 
     constructor() {
+        this.add(new cmd_help(this));
         this.add(new cmd_creategame());
         this.add(new cmd_close());
         this.add(new cmd_kick());
@@ -39,6 +41,10 @@ export class CommandManager {
 
     add(command: Command) {
         this.commands.push(command);
+    }
+
+    getAll(): Array<Command> {
+        return this.commands;
     }
 
     handleMessage(dcMessage: Discord.Message) {

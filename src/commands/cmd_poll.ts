@@ -9,13 +9,13 @@ import {Game, GamePhase} from "../game/game";
 export class cmd_poll extends Command {
 
     constructor(){
-        super("poll", "Umfrage starten - Argument public = User Votes werden angezeigt");
+        super("poll", "Umfrage starten - Wenn \"private\" als Argument angehängt überschreibt es die Channel vorauswahl.", "[private]");
     }
 
     execute(dcMessage: Discord.Message) {
 
         let privateString: string = dcMessage.content.split(" ", 2)[1];
-        let isPrivate: boolean = false;
+        let isPrivate: boolean = null;
 
         if(privateString == "private" || privateString == "privat") {
             isPrivate = true;
@@ -41,7 +41,7 @@ export class cmd_poll extends Command {
         let tmpMsg;
         if (id != -1) {
 
-            let game = guildManager.games[id];
+            let game: Game = guildManager.games[id];
             if(game.gamePhase != GamePhase.ingame) {
                 dcMessage.channel.send("Das Spiel befindet sich nicht in der Ingame Phase").then((msg) => {
                     tmpMsg = msg;
@@ -50,7 +50,7 @@ export class cmd_poll extends Command {
                 return;
             }
 
-            if(!game.createPoll(dcMessage.channel)) {
+            if(!game.createPoll(dcMessage.channel, isPrivate)) {
                 dcMessage.channel.send("Dies ist kein Vote-Channel").then((msg) => {
                     tmpMsg = msg;
                     tmpMsg.delete(3000);

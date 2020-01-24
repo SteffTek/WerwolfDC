@@ -183,7 +183,7 @@ export class Game {
         this.createMessage.delete();
     }
 
-    createPoll(dcChannel: Discord.Channel) {
+    createPoll(dcChannel: Discord.Channel, isPrivate: boolean = null) {
 
         var privatePoll = false;
         var channel: Discord.TextChannel;
@@ -200,6 +200,10 @@ export class Game {
         if(dcChannel.id == this.userChannelMap.get("Abstimmungen").id) {
             channel = this.userChannelMap.get("Abstimmungen");
             privatePoll = true;
+        }
+
+        if(isPrivate != null) {
+            privatePoll = isPrivate;
         }
 
         if (channel == null) {

@@ -8,7 +8,7 @@ import {User} from "../game/user";
 export class cmd_kick extends Command {
 
     constructor() {
-        super("kick", "Nutzer entfernen");
+        super("kick", "Nutzer entfernen", "<username>");
     }
 
     execute(dcMessage: Discord.Message) {

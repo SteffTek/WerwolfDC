@@ -9,7 +9,7 @@ import {Game, GamePhase} from "../game/game";
 export class cmd_pool extends Command {
 
     constructor(){
-        super("pool", "Rollen festlegen");
+        super("pool", "Rollen festlegen", "3 Werwolf(wwchat) Hexe(hexenchat) Jäger Amor(amorchat) 4 Dorfbewohner");
     }
 
     execute(dcMessage: Discord.Message) {

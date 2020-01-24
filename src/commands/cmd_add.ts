@@ -9,7 +9,7 @@ import {User} from "../game/user";
 export class cmd_add extends Command {
 
     constructor(){
-        super("add", "Nutzer hinzufügen - Role nur während der Ingame Phase benötigt");
+        super("add", "Nutzer hinzufügen - Role nur während der Ingame Phase benötigt", "<username> [role]");
     }
 
     execute(dcMessage: Discord.Message) {
@@ -18,6 +18,10 @@ export class cmd_add extends Command {
         let role: string = dcMessage.content.split(" ", 3)[2];
         let guild = dcMessage.guild;
         if(guild == null) {
+            return;
+        }
+
+        if(user == null || role == null) {
             return;
         }
 

@@ -48,7 +48,7 @@ Dieser Bot übernimmt das Erstellen und Managen von Werwolf-Rollenspielen über 
 
 #### Abstimmung erstellen
 ##### (Public = User Votes werden direkt angezeigt)
-> /poll [public]
+> /poll [private]
 
 #### Rolle ändern
 > /role user newRole(chat)

@@ -7,7 +7,7 @@ import {Game, GamePhase} from "../game/game";
 export class cmd_shuffle extends Command {
 
     constructor(){
-        super("shuffle", "Mischt die Rollen in der Checking Phase");
+        super("shuffle", "Mischt die Rollen in der Checking Phase.");
     }
 
     execute(dcMessage: Discord.Message) {

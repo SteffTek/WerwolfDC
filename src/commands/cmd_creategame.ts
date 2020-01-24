@@ -10,7 +10,7 @@ import conf = require("../utils/config");
 export class cmd_creategame extends Command {
 
     constructor() {
-        super("create", "Erstellt ein neues Spiel.");
+        super("create", "Erstellt ein neues Spiel.", "<emoji> [message]");
     }
 
     execute(dcMessage: Discord.Message) {

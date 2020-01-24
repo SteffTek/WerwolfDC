@@ -9,7 +9,7 @@ import {User} from "../game/user";
 export class cmd_role extends Command {
 
     constructor(){
-        super("role", "Nutzerrolle während des Spiels ändern.");
+        super("role", "Nutzerrolle während des Spiels ändern.", "<user> <role>");
     }
 
     execute(dcMessage: Discord.Message) {
@@ -18,6 +18,10 @@ export class cmd_role extends Command {
         let role: string = dcMessage.content.split(" ", 3)[2];
         let guild = dcMessage.guild;
         if(guild == null) {
+            return;
+        }
+
+        if(user == null || role == null) {
             return;
         }
 

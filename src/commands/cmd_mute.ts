@@ -8,7 +8,7 @@ import {constants} from "../utils/const";
 export class cmd_mute extends Command {
 
     constructor() {
-        super("mute", "Spieler muten");
+        super("mute", "Spieler muten", "<username>");
     }
 
     execute(dcMessage: Discord.Message) {

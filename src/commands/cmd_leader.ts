@@ -9,7 +9,7 @@ import {Game} from "../game/game";
 export class cmd_leader extends Command {
 
     constructor(){
-        super("leader", "Spielleitung übergeben");
+        super("leader", "Spielleitung übergeben", "<username>");
     }
 
     execute(dcMessage: Discord.Message) {
