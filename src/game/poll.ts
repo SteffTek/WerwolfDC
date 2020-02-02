@@ -152,6 +152,7 @@ export class Poll {
 
         var votes = {} // ACCUSED ID : COUNT
         var voters = this._game.getAlive();
+
         for(let v in voters) {
             let voter = this._game.getUser(v);
 
@@ -175,6 +176,7 @@ export class Poll {
             //CREATE EMBED MESSAGE
             let user = this._game.getUser(vote);
 
+
             if(user == null) {
                 // Vote = 0 aka Enthalten
                 continue;
@@ -184,7 +186,7 @@ export class Poll {
             for(let userVote in this._votes) {
                 let voteUser = this._game.getUser(userVote);
 
-                if(this._votes[userVote] == voteUser.dcUser.id) {
+                if(this._votes[userVote] == user.dcUser.id) {
                     string += voteUser.dcUser.displayName + "; "
                 }
             }
@@ -354,8 +356,8 @@ export class Poll {
                     this.updateVotedList();
 
                     this._votes[voter.dcUser.id] = 0;
-                    return;
                 });
+                return;
             }
         }
 

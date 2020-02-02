@@ -20,6 +20,10 @@ export class DiscordHandler {
             MainIndex.instance.discordClient.guilds.forEach((value => {
                 MainIndex.instance.guildGameManager.push(new GuildGameManager(value));
             }))
+
+            MainIndex.instance.discordClient.user.setActivity(conf.getConfig().prefix + "help | Server: " + MainIndex.instance.discordClient.guilds.size, { type: 'PLAYING' });
+
+            logger.info("Server loaded!");
         });
 
         //REACTION HANDLER
@@ -151,16 +155,14 @@ export class DiscordHandler {
                     let gm = guild.games[g];
                     for(let u in gm.users) {
                         let usr = gm.users[u];
-
                         if(usr.dcUser.id == msg.author.id) {
                             game = gm;
-                            break;
                         }
                     }
                 }
 
                 if(game == null) {
-                    return;
+                    continue;
                 }
 
                 for(let p in game.polls) {
@@ -168,7 +170,6 @@ export class DiscordHandler {
 
                     if(poll.channel.id == msg.channel.id) {
                         poll.handleMessage(msg);
-                        break;
                     //PRIVAT CHAT
                     } else if(msg.guild == null){
                         if(poll.channel.id == game.userChannelMap.get("Abstimmungen").id){

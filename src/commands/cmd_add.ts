@@ -21,7 +21,7 @@ export class cmd_add extends Command {
             return;
         }
 
-        if(user == null || role == null) {
+        if(user == null) {
             return;
         }
 

@@ -114,7 +114,7 @@ export class Game {
 
         this.userChannelMap.get("Spielleitung").send("```css\n- - - Nutzer - - -\n```").then(msg => {
             //ROLLEN VERTEILEN
-            this.createMessage.delete();
+            this.createMessage.delete().catch();
             let i = 0;
             function recursion(game: Game) {
                 let user = game.users[i];
@@ -180,7 +180,7 @@ export class Game {
         constants.mayorRole(this.guild, this.id).delete();*/
 
         //Remove Invite Message
-        this.createMessage.delete();
+        this.createMessage.delete().catch();
     }
 
     createPoll(dcChannel: Discord.Channel, isPrivate: boolean = null) {
@@ -528,6 +528,7 @@ export class Game {
 
         //Create Roles
         if (constants.leaderRole(this.guild, this.id) == null) {
+            console.log("oof");
             this.guild.createRole({name: "Spielleiter #" + this.id, color: "ORANGE", hoist: true}).then(role => {
                 instantiated++;
             });
