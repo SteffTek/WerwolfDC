@@ -428,10 +428,16 @@ export class Game {
             //Special Channel
             game.guild.createChannel(chat, {
                 type: "text",
-                permissionOverwrites: [{id: constants.leaderRole(game.guild, game.id)}, {
-                    id: game.guild.defaultRole.id,
-                    deny: ["VIEW_CHANNEL"]
-                }]
+                permissionOverwrites: [
+                    {
+                        id: constants.leaderRole(game.guild, game.id),
+                        allow: ["VIEW_CHANNEL", "SEND_MESSAGES"]
+                    },
+                    {
+                        id: game.guild.defaultRole.id,
+                        deny: ["VIEW_CHANNEL"]
+                    }
+                ]
             }).then((chan: Discord.TextChannel) => {
                 chan.setParent(game.userChannelMap.get("Category").id);
                 game.userChannelMap.get("specialChats").push(chan);
